@@ -44,8 +44,7 @@ Feature: Test editing a Formulas question
     And I switch to "questionpreview" window
     Then I should see "Multiple parts : --"
     # Set behaviour options
-    And I set the following fields to these values:
-      | behaviour | immediatefeedback |
+    When I set the field "How questions behave" to "Immediate feedback"
     And I press "Start again with these options"
     And I press "Check"
     And I should see "Please put an answer in each input field."
