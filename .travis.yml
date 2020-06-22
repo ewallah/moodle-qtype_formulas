@@ -48,6 +48,7 @@ before_install:
   - google-chrome-stable --headless --disable-extensions --no-sandbox --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 &>/dev/null &
 
 install:
+  - moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
   - moodle-plugin-ci install
 
 script:
