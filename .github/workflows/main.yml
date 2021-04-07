@@ -53,51 +53,51 @@ jobs:
 
       - name: phpcpd
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi phpcpd
 
       - name: phpmd
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi phpmd
 
       - name: codechecker
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi codechecker
 
       - name: validate
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi validate
 
       - name: phpdoc
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi phpdoc
 
       - name: savepoints
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi savepoints
 
       - name: mustache
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi mustache
 
       - name: init phpunit
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: php admin/tool/phpunit/cli/init.php
         working-directory: moodle
 
       - name: phpunit
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi phpunit --coverage-text
 
       - name: firefox
         continue-on-error: true
-        if: $
+        if: ${{ always() }}
         run: moodle-plugin-ci --ansi behat --start-servers
