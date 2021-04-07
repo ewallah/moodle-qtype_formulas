@@ -1,0 +1,83 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        moodle-branch: ['master', 'MOODLE_311_STABLE', 'MOODLE_310_STABLE', 'MOODLE_39_STABLE']
+        php: ['7.4']
+        database: ['mysqli']
+
+    name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.database }}
+
+    steps:
+      - name: checkout plugin
+        uses: actions/checkout@v2
+        with:
+          path: this-plugin
+
+      - name: setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, mysqli, gd, zip
+
+      - name: checkout moodle-plugin-ci
+        uses: actions/checkout@v2
+        with:
+          repository: moodlehq/moodle-plugin-ci
+          path: ci
+
+      - name: composer
+        run: |
+           composer install
+           echo "$(cd bin; pwd)" >> $GITHUB_PATH
+           echo "$(cd vendor/bin; pwd)" >> $GITHUB_PATH
+           sudo locale-gen en_AU.UTF-8
+           sudo systemctl start mysql.service
+        working-directory: ci
+
+      - name: install Moodle
+        run: moodle-plugin-ci --ansi install -v --db-user=root --db-pass=root --db-host=127.0.0.1 --plugin this-plugin
+        env:
+          DB: ${{ matrix.database }}
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+
+      - name: phplint
+        run: moodle-plugin-ci --ansi phplint
+
+      - name: phpcpd
+        run: moodle-plugin-ci --ansi phpcpd
+
+      - name: phpmd
+        run: moodle-plugin-ci --ansi phpmd
+
+      - name: codechecker
+        run: moodle-plugin-ci --ansi codechecker || true
+
+      - name: validate
+        run: moodle-plugin-ci --ansi validate
+
+      - name: phpdoc
+        run: moodle-plugin-ci --ansi phpdoc || true
+
+      - name: savepoints
+        run: moodle-plugin-ci --ansi savepoints
+
+      - name: mustache
+        run: moodle-plugin-ci --ansi mustache
+
+      - name: init phpunit
+        run: php admin/tool/phpunit/cli/init.php
+        working-directory: moodle
+
+      - name: phpunit
+        run: moodle-plugin-ci --ansi phpunit --coverage-text
+
+      - name: firefox
+        run: moodle-plugin-ci --ansi behat --start-servers

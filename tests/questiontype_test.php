@@ -52,11 +52,11 @@ class qtype_formulas_test extends advanced_testcase {
         return test_question_maker::make_question('formulas', $which);
     }
 
-    protected function setUp() {
+    protected function setUp():void {
         $this->qtype = new qtype_formulas();
     }
 
-    protected function tearDown() {
+    protected function tearDown():void {
         $this->qtype = null;
     }
 
@@ -209,7 +209,7 @@ class qtype_formulas_test extends advanced_testcase {
         $this->assertDebuggingCalled('Formulas question ID ' . $question->id . ' was missing an options record. Using default.');
         $html = ob_get_contents();
         ob_end_clean();
-        $this->assertContains('Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id, $html);
+        $this->assertStringContainsString('Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id, $html);
         $this->assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
         $this->assertEquals($question->id, $options->questionid);
@@ -226,7 +226,7 @@ class qtype_formulas_test extends advanced_testcase {
         $this->assertDebuggingCalled('Formulas question ID ' . $question->id . ' was missing an options record. Using default.');
         $html = ob_get_contents();
         ob_end_clean();
-        $this->assertContains('Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id, $html);
+        $this->assertStringContainsString('Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id, $html);
         $this->assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
         $this->assertEquals($question->id, $options->questionid);
