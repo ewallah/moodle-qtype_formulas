@@ -52,32 +52,52 @@ jobs:
         run: moodle-plugin-ci --ansi phplint
 
       - name: phpcpd
+        continue-on-error: true
+        if: $
         run: moodle-plugin-ci --ansi phpcpd
 
       - name: phpmd
+        continue-on-error: true
+        if: $
         run: moodle-plugin-ci --ansi phpmd
 
       - name: codechecker
-        run: moodle-plugin-ci --ansi codechecker || true
+        continue-on-error: true
+        if: $
+        run: moodle-plugin-ci --ansi codechecker
 
       - name: validate
+        continue-on-error: true
+        if: $
         run: moodle-plugin-ci --ansi validate
 
       - name: phpdoc
-        run: moodle-plugin-ci --ansi phpdoc || true
+        continue-on-error: true
+        if: $
+        run: moodle-plugin-ci --ansi phpdoc
 
       - name: savepoints
+        continue-on-error: true
+        if: $
         run: moodle-plugin-ci --ansi savepoints
 
       - name: mustache
+        continue-on-error: true
+        if: $
         run: moodle-plugin-ci --ansi mustache
 
       - name: init phpunit
+        continue-on-error: true
+        if: $
         run: php admin/tool/phpunit/cli/init.php
         working-directory: moodle
 
       - name: phpunit
+        continue-on-error: true
+        if: $
         run: moodle-plugin-ci --ansi phpunit --coverage-text
 
       - name: firefox
+        continue-on-error: true
+        if: $
         run: moodle-plugin-ci --ansi behat --start-servers
