@@ -103,7 +103,7 @@ abstract class qtype_formulas_walkthrough_test_base extends qbehaviour_walkthrou
     }
 
     protected function check_output_does_not_contain_stray_placeholders() {
-        $this->assertNotRegExp('~\[\[|\]\]~', $this->currentoutput, 'Not all placehoders were replaced.');
+        $this->assertDoesNotMatchRegularExpression('~\[\[|\]\]~', $this->currentoutput, 'Not all placehoders were replaced.');
     }
 
     protected function check_output_contains_lang_string($identifier, $component = '', $a = null) {
