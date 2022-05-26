@@ -20,14 +20,10 @@ Feature: Preview a Formulas question
     And the following "questions" exist:
       | questioncategory | qtype      | name         | template  |
       | Test questions   | formulas   | formulas-001 | test2     |
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I navigate to "Question bank" in current page administration
 
   @javascript @_switch_window
   Scenario: Preview a formulas question with correct answer
-    When I choose "Preview" action for "formulas-001" in the question bank
-    And I switch to "questionpreview" window
+    When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     Then I should see "This question shows different display methods of the answer and unit box."
     And I should see "If a car travel 120 m in 3 s, what is the speed of the car"
     # Set behaviour options
@@ -46,8 +42,7 @@ Feature: Preview a Formulas question
 
   @javascript @_switch_window
   Scenario: Preview an formulas question with incorrect answer
-    When I choose "Preview" action for "formulas-001" in the question bank
-    And I switch to "questionpreview" window
+    When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     Then I should see "This question shows different display methods of the answer and unit box."
     And I should see "If a car travel 120 m in 3 s, what is the speed of the car"
     # Set behaviour options

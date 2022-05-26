@@ -18,15 +18,13 @@ Feature: Test editing a Formulas question
       | contextlevel | reference | name           |
       | Course       | C1        | Test questions |
     And the following "questions" exist:
-      | questioncategory | qtype       | name                      | template   |
-      | Test questions   | formulas     | formulas-001 for editing | test1      |
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I navigate to "Question bank" in current page administration
+      | questioncategory | qtype    | name                     | template   |
+      | Test questions   | formulas | formulas-001 for editing | test1      |
 
-  @javascript @_switch_window
+  @javascript
   Scenario: Edit a Formulas question
-    When I choose "Edit question" action for "formulas-001 for editing" in the question bank
+    When I am on the "Course 1" "core_question > course question bank" page logged in as teacher1
+    And I choose "Edit question" action for "formulas-001 for editing" in the question bank
     And I set the following fields to these values:
       | Question name | |
     And I press "id_submitbutton"
@@ -40,23 +38,3 @@ Feature: Test editing a Formulas question
       | Random variables     | v = {40:120:10}; dt = {2:6};  |
     And I press "id_submitbutton"
     Then I should see "Edited formulas-001 name"
-    When I choose "Preview" action for "Edited formulas-001 name" in the question bank
-    And I switch to "questionpreview" window
-    Then I should see "Multiple parts : --"
-    # Set behaviour options
-    When I set the field "How questions behave" to "Immediate feedback"
-    And I press "Start again with these options"
-    And I press "Check"
-    And I should see "Please put an answer in each input field."
-    And I press "Start again"
-    And I set the field "Answer for part 1" to "1"
-    And I set the field "Answer for part 2" to "6"
-    And I set the field "Answer for part 3" to "7"
-    And I press "Check"
-    And I should see "Partially correct"
-    And I press "Start again"
-    And I set the field "Answer for part 1" to "5"
-    And I set the field "Answer for part 2" to "6"
-    And I set the field "Answer for part 3" to "7"
-    And I press "Check"
-    And I should see "Correct"

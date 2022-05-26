@@ -20,12 +20,10 @@ Feature: Test exporting Formulas questions
     And the following "questions" exist:
       | questioncategory | qtype       | name           | template   |
       | Test questions   | formulas    | formulas-001   | test2      |
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
 
-  @javascript @_file_upload
+  @javascript
   Scenario: Export a Formulas question
-    When I navigate to "Question bank > Export" in current page administration
+    When I am on the "Course 1" "core_question > course question export" page logged in as teacher1
     And I set the field "id_format_xml" to "1"
     And I press "Export questions to file"
     Then following "click here" should download between "4000" and "6000" bytes

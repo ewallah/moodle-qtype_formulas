@@ -15,14 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests of the upgrade to the new Moodle question engine for attempts at
- * truefalse questions.
+ * Tests of the upgrade to the new Moodle question engine for attempts at formulas questions.
  *
  * @package    qtype_formulas
  * @copyright  2013 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -33,10 +31,15 @@ require_once($CFG->dirroot . '/question/engine/upgrade/tests/helper.php');
 /**
  * Testing the upgrade of formulas question attempts.
  *
+ * @package    qtype_formulas
  * @copyright  2009 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_test_base {
+class upgradelibnewqe_test extends question_attempt_upgrader_test_base {
+
+    /**
+     * Test formulas deferredfeedbacksubmit wrong submit right
+     */
     public function test_formulas_deferredfeedback_qsession2() {
         $quiz = (object) array(
             'id' => '1',

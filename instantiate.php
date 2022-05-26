@@ -15,12 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * return the instantiated dataset of the variables in the form of JSON.
+ * Return the instantiated dataset of the variables in the form of JSON.
  *
- * @copyright &copy; 2011 Hon Wai, Lau
- * @author Hon Wai, Lau <lau65536@gmail.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
- * @package qtype_formulas
+ * @package   qtype_formulas
+ * @copyright 2013 Jean-Michel Vedrine
+ * @author    Hon Wai, Lau <lau65536@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 
 define('AJAX_SCRIPT', true);
@@ -30,43 +30,62 @@ require_once(__DIR__ . '/variables.php');
 
 $qv = new qtype_formulas_variables();
 
-// Given the variable assignments, it try to instantiate multiple datasets and return a data structure used by javascript.
+/**
+ * Given the variable assignments, it try to instantiate multiple datasets and return a data structure used by javascript.
+ *
+ * @param array $varsrandom
+ * @param array $varsglobal
+ * @param array $varslocals
+ * @param array $answers
+ * @param int $start
+ * @param object $nbdataset
+ * @param bool $alwaysrandom
+ * @return string
+ */
 function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $answers, $start, $nbdataset, $alwaysrandom) {
     global $qv;
-    $showall = ($nbdataset < 0);   // If $nbdataset > 0, it will try to enumerate all possible combinations, if # dataset < 1000.
+    // If $nbdataset > 0, it will try to enumerate all possible combinations, if # dataset < 1000.
+    $showall = ($nbdataset < 0);
     $vrinfo = $qv->parse_random_variables($varsrandom);
-    $maxdataset = $qv->vstack_get_number_of_dataset($vrinfo);   // It is the same for all instantiations.
+    // It is the same for all instantiations.
+    $maxdataset = $qv->vstack_get_number_of_dataset($vrinfo);
     if ($showall) {
-        $nbdataset = min(1000, $maxdataset);   // Dynamic resize to the same # as exhaustive enumeration, limited to 1000.
+        // Dynamic resize to the same # as exhaustive enumeration, limited to 1000.
+        $nbdataset = min(1000, $maxdataset);
     }
     $hasshuffle = $qv->vstack_get_has_shuffle($vrinfo);
     if ($nbdataset >= $maxdataset && !$hasshuffle) {
-        $nbdataset = $maxdataset;     // There is no need to generate redundant datasets if there is no shuffle assignment.
+        // There is no need to generate redundant datasets if there is no shuffle assignment.
+        $nbdataset = $maxdataset;
     }
 
-    $names = array();
-    $data = array();
-    $errors = array();
+    $names = [];
+    $data = [];
+    $errors = [];
     for ($count = 0; $count < $nbdataset; $count++) {
         $errors[$count] = '';
-        $v = array();
+        $v = [];
         try {
-            $datasetid = ($alwaysrandom || $nbdataset < $maxdataset) ? -1 : $start + $count;   // Use enumeration if possible, -1 means random.
+            $datasetid = ($alwaysrandom || $nbdataset < $maxdataset) ? -1 : $start + $count;
+            // Use enumeration if possible, -1 means random.
             $v['random'] = $qv->instantiate_random_variables($vrinfo, $datasetid);
             $names['random'] = isset($names['random']) ? $names['random'] + $v['random']->all : $v['random']->all;
             $v['global'] = $qv->evaluate_assignments($v['random'], $varsglobal);
             $names['global'] = isset($names['global']) ? $names['global'] + $v['global']->all : $v['global']->all;
 
-            foreach ($varslocals as $idx => $varslocal) {
+            foreach ($varslocals as $idx => $notused) {
                 $v['local'.$idx] = $qv->evaluate_assignments($v['global'], $varslocals[$idx]);
-                $names['local'.$idx] = isset($names['local'.$idx]) ? $names['local'.$idx] + $v['local'.$idx]->all : $v['local'.$idx]->all;
+                $names['local'.$idx] = isset($names['local'.$idx]) ?
+                    $names['local'.$idx] + $v['local'.$idx]->all :
+                    $v['local'.$idx]->all;
                 if (strlen(trim($answers[$idx])) == 0) {
                     continue;
                 }
                 $res = $qv->evaluate_general_expression($v['local'.$idx], $answers[$idx]);
                 if ($res->type[0] != 'l') {
                     $res->type = 'l'.$res->type;
-                    $res->value = array($res->value);   // Change all answers to arrays.
+                    // Change all answers to arrays.
+                    $res->value = [$res->value];
                 }
                 if ($res->type[1] == 's') {
                     $res->value = $qv->substitute_partial_formula($v['local'.$idx], $res->value);
@@ -77,8 +96,9 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
                 $names['answer'.$idx] = $vstack->all;
             }
         } catch (Exception $e) {
+            // Skip all errors and go to the next instantiation.
             $errors[$count] = $e->getMessage();
-        }   // Skip all errors and go to the next instantiation.
+        }
         $data[] = $v;
     }
 
@@ -93,24 +113,30 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
     $names['random'] = filter_redundant_names($data, $names, 'random', '');
 
     // Instantiate the variables and get the values.
-    $lists = array();
+    $lists = [];
     for ($count = 0; $count < $nbdataset; $count++) {
-        $s = array();
-        foreach ($names as $category => $n) {
+        $s = [];
+        foreach ($names as $category => $notused) {
             $s[$category] = pick_variables_with_names($data, $names, $category, $count);
         }
         $lists[] = $s;
     }
-    return json_encode(array('names' => $names, 'lists' => $lists, 'size' => $nbdataset, 'maxdataset' => $maxdataset, 'errors' => $errors));
+    return json_encode(
+        ['names' => $names, 'lists' => $lists, 'size' => $nbdataset, 'maxdataset' => $maxdataset, 'errors' => $errors]);
 }
 
-
-
-
-// Filter out the unused variable names in the table header.
+/**
+ * Filter out the unused variable names in the table header.
+ *
+ * @param array $data
+ * @param array $names
+ * @param string $a
+ * @param string $b
+ * @return array
+ */
 function filter_redundant_names($data, $names, $a, $b) {
     global $qv;
-    $tmp = array();
+    $tmp = [];
     if (!array_key_exists($a, $names)) {
         return null;
     }
@@ -122,8 +148,16 @@ function filter_redundant_names($data, $names, $a, $b) {
     return $tmp;
 }
 
-
-// Check whether the name should be included.
+/**
+ * Check whether the name should be included.
+ *
+ * @param array $data
+ * @param array $names
+ * @param string $a
+ * @param string $b
+ * @param string $n
+ * @return array
+ */
 function check_include_name($data, $names, $a, $b, $n) {
     global $qv;
     if (!array_key_exists($b, $names) || !array_key_exists($n, $names[$b])) {
@@ -145,15 +179,22 @@ function check_include_name($data, $names, $a, $b, $n) {
     return false;
 }
 
-
-// Pick the corresponding variable value listed in the names[category].
+/**
+ * Pick the corresponding variable value listed in the names[category].
+ *
+ * @param array $data
+ * @param array $names
+ * @param string $category
+ * @param string $idx
+ * @return array
+ */
 function pick_variables_with_names($data, $names, $category, $idx) {
     global $qv;
     if (!array_key_exists($category, $data[$idx])) {
         return null;
     }
     $d = $data[$idx][$category];
-    $res = array();
+    $res = [];
     for ($i = 0; $i < count($names[$category]); $i++) {
         $name = $names[$category][$i];
         $tmp = $qv->vstack_get_variable($d, $name);
@@ -180,5 +221,6 @@ try {
     echo $res;
 } catch (Exception $e) {
     // Prevent the display of all errors.
+    echo '';
 }
 

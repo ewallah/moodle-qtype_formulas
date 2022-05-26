@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Restore plugin class to restore one formulas qtype plugin
+ *
  * @package    qtype_formulas
  * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -23,8 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * restore plugin class that provides the necessary information
- * needed to restore one formulas qtype plugin
+ * Restore plugin class that provides the necessary information needed to restore one formula
  *
  * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -33,10 +34,11 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
     /**
      * Returns the paths to be handled by the plugin at question level
+     * @return array
      */
     protected function define_question_plugin_structure() {
 
-        $paths = array();
+        $paths = [];
 
         // This qtype uses don't question_answers, qtype_formulas_answers are differents.
 
@@ -53,6 +55,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
     /**
      * Process the qtype/formulas element
+     * @param array $data
      */
     public function process_formulas($data) {
         global $DB;
@@ -96,6 +99,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
     /**
      * Process the qtype/formulasanswer element
+     * @param array $data
      */
     public function process_formulas_answer($data) {
         global $DB;
@@ -119,7 +123,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             // All 2.0 backups are missing the part's index.
             if (!isset($data->partindex)) {
                 $data->partindex = (int)$DB->get_field('qtype_formulas_answers',
-                        'MAX(partindex) +1', array('questionid' => $newquestionid));
+                    'MAX(partindex) +1', ['questionid' => $newquestionid]);
             }
             // Old backups are missing the part's combined feedback.
             if (!isset($data->partcorrectfb)) {
@@ -144,16 +148,15 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
     /**
      * Return the contents of this qtype to be processed by the links decoder
+     * @return array
      */
     public static function define_decode_contents() {
-        return array(
+        return [
             new restore_decode_content('qtype_formulas_options',
-                    array('correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'),
-                    'qtype_formulas'),
-            new restore_decode_content('qtype_formulas_answers', array('subqtext', 'feedback',
-                    'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'),
-                    'qtype_formulas_answers'),
-        );
+                ['correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'], 'qtype_formulas'),
+            new restore_decode_content('qtype_formulas_answers',
+                ['subqtext', 'feedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'], 'qtype_formulas_answers')
+        ];
     }
 
 }

@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Global settings
+ *
  * @package    qtype_formulas
  * @copyright  2013 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,10 +33,10 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('qtype_formulas/defaultanswertype',
             new lang_string('defaultanswertype', 'qtype_formulas'),
             new lang_string('defaultanswertype_desc', 'qtype_formulas'), 0,
-            array(0 => new lang_string('number', 'qtype_formulas'),
-                    10 => new lang_string('numeric', 'qtype_formulas'),
-                        100 => new lang_string('numerical_formula', 'qtype_formulas'),
-                        1000 => new lang_string('algebraic_formula', 'qtype_formulas'))));
+            [  0 => new lang_string('number', 'qtype_formulas'),
+              10 => new lang_string('numeric', 'qtype_formulas'),
+             100 => new lang_string('numerical_formula', 'qtype_formulas'),
+            1000 => new lang_string('algebraic_formula', 'qtype_formulas')]));
     // Default correctness.
     $settings->add(new admin_setting_configtext('qtype_formulas/defaultcorrectness',
         get_string('defaultcorrectness', 'qtype_formulas'),

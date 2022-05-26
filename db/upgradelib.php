@@ -25,32 +25,52 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class for converting attempt data for formulas questions when upgrading
- * attempts to the new question engine.
- *
- * This class is used by the code in question/engine/upgrade/upgradelib.php.
+ * Class for converting attempt data for formulas questions when upgrading attempts
  *
  * @copyright  2013 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater {
+
+    /**
+     * Function rightanswer
+     *
+     * @return string
+     */
     public function right_answer() {
         return '';
     }
 
+    /**
+     * Function summary
+     *
+     * @return string
+     */
     public function question_summary() {
         // Done later when we know random variables.
         return '';
     }
 
+    /**
+     * Function was answered
+     *
+     * @param stdClass $state
+     * @return boolean
+     */
     public function was_answered($state) {
         $parsedanswer = $this->parse_answer($state->answer);
         $allresponses = implode('', $parsedanswer['responses']);
         return !empty($allresponses);
     }
 
+    /**
+     * Function response summary
+     *
+     * @param stdClass $state
+     * @return string
+     */
     public function response_summary($state) {
-        $summary = array();
+        $summary = [];
         $parsedanswer = $this->parse_answer($state->answer);
         $responses = $parsedanswer['responses'];
         foreach ($this->question->options->answers as $part) {
@@ -69,6 +89,12 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
         return $summary;
     }
 
+    /**
+     * Function set first step data elements
+     *
+     * @param stdClass $state
+     * @param array $data
+     */
     public function set_first_step_data_elements($state, &$data) {
         $parsedanswer = $this->parse_answer($state->answer);
         $data['_randomsvars_text'] = $parsedanswer['randomvars'];
@@ -90,6 +116,11 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
         $this->updater->qa->questionsummary = $summary;
     }
 
+    /**
+     * Function supply missing first step data
+     *
+     * @param array $data
+     */
     public function supply_missing_first_step_data(&$data) {
         // There is nothing we can do now for global variables,
         // but we will try to fix it later.
@@ -98,6 +129,12 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
 
     }
 
+    /**
+     * Function set data elements for step
+     *
+     * @param stdClass $state
+     * @param array $data
+     */
     public function set_data_elements_for_step($state, &$data) {
         $parsedanswer = $this->parse_answer($state->answer);
         $responses = $parsedanswer['responses'];
@@ -124,11 +161,17 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
         }
     }
 
+    /**
+     * Function parse answer
+     *
+     * @param stdClass $answer
+     * @return array
+     */
     protected function parse_answer($answer) {
-        $data = array();
+        $data = [];
         $lines = explode("\n", $answer);
         $counter = 0;
-        $details = array();
+        $details = [];
         while (strlen(trim($lines[$counter])) != 0) { // Read lines until an empty one is encountered.
             $pair = explode('=', $lines[$counter], 2);
             if (count($pair) == 2) {
@@ -136,26 +179,40 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
             }
             $counter++;
         }
-        $grading = array();
-        $responses = array();
+        $grading = [];
+        $responses = [];
         foreach ($this->question->options->answers as $i => $part) {
-            $grading[$i] = array_key_exists($i, $details) ? explode(',', $details[$i]) : array(0, 0, 0, 0);
+            $grading[$i] = array_key_exists($i, $details) ? explode(',', $details[$i]) : [0, 0, 0, 0];
             foreach (range(0, $part->numbox) as $j) {
                 $responses["${i}_$j"] = array_key_exists("${i}_$j", $details) ? $details["${i}_$j"] : '';
             }
         }
         $subanum = intval($lines[$counter + 1]);
         $randomvars = implode("", array_slice($lines, $counter + 3));
-        return array('responses' => $responses, 'subanum' => $subanum, 'grading' => $grading, 'randomvars' => trim($randomvars));
+        return ['responses' => $responses, 'subanum' => $subanum, 'grading' => $grading, 'randomvars' => trim($randomvars)];
 
     }
 
-    // Copied and adapted from question definition.
+    /**
+     * Function has separate unit fields
+     *
+     * Copied and adapted from question definition.
+     *
+     * @param stdClass $part
+     * @return  bool
+     */
     public function has_separate_unit_field($part) {
         return strlen($part->postunit) != 0 && $this->has_combined_unit_field($part) == false;
     }
 
-    // Copied and adapted from question definition.
+    /**
+     * Function parse answer
+     *
+     * Copied and adapted from question definition.
+     *
+     * @param stdClass $part
+     * @return bool
+     */
     public function has_combined_unit_field($part) {
         return strlen($part->postunit) != 0 && $part->numbox == 1 && $part->answertype != 1000
                 && (strpos($part->subqtext, "{_0}{_u}") !== false

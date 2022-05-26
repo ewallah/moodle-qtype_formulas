@@ -31,24 +31,36 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_test_helper extends question_test_helper {
+    /** @var correct **/
     const DEFAULT_CORRECT_FEEDBACK          = '<p>Correct answer, well done.</p>';
+    /** @var partially correct **/
     const DEFAULT_PARTIALLYCORRECT_FEEDBACK = '<p>Your answer is partially correct.</p>';
+    /** @var incorrect **/
     const DEFAULT_INCORRECT_FEEDBACK        = '<p>Incorrect answer.</p>';
 
+
+    /**
+     * Collect test questions
+     * @return array of qtype_formulas_question
+     */
     public function get_test_questions() {
-        return array(
-            'test0', // Minimal formulas question : one part, not randomised (answer = 5),
-            'test1', // 3 parts, not randomised. (answers = 5, 6, 7),
-            'test2', // 4 parts, separated and combined unit field, not ramdomized,
-            'test3', // one part, not randomized, answer = 0 (to test problem with 0 as answer,
-            'test4', // 4 parts, separated and combined unit field, ramdomized.
-            'test5', // One part not randomized multichoice answer.
-        );
+        return [
+            // Minimal formulas question : one part, not randomised (answer = 5).
+            'test0',
+            // Or 3 parts, not randomised. (answers = 5, 6, 7).
+            'test1',
+            // Or 4 parts, separated and combined unit field, not ramdomized.
+            'test2',
+            // One part, not randomized, answer = 0 (to test problem with 0 as answer.
+            'test3',
+            // Or 4 parts, separated and combined unit field, ramdomized.
+            'test4',
+            // One part not randomized multichoice answer.
+            'test5'];
     }
 
     /**
-     * Does the basical initialisation of a new formulas question that all the test
-     * questions will need.
+     * Does the basical initialisation of a new formulas question that all the test questions will need.
      * @return qtype_formulas_question the new question.
      */
     protected static function make_a_formulas_question() {
@@ -66,14 +78,18 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->penalty = 0.2; // The default.
         test_question_maker::set_standard_combined_feedback_fields($q);
         $q->numpart = 0;   // This is of course invalid but should be changed by all tests.
-        $q->parts = array();
-        $q->evaluatedanswer = array();
-        $q->fractions = array();
-        $q->anscorrs = array();
-        $q->unitcorrs = array();
+        $q->parts = [];
+        $q->evaluatedanswer = [];
+        $q->fractions = [];
+        $q->anscorrs = [];
+        $q->unitcorrs = [];
         return $q;
     }
 
+    /**
+     * Make a part
+     * @return qtype_formulas_part
+     */
     protected static function make_a_formulas_part() {
         question_bank::load_question_definition_classes('formulas');
 
@@ -107,6 +123,7 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
+     * Make test 0
      * @return qtype_formulas_question the question from the test0.xml file.
      */
     public static function make_formulas_question_test0() {
@@ -117,9 +134,9 @@ class qtype_formulas_test_helper extends question_test_helper {
                 . ' (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>';
 
         $q->penalty = 0.3; // Non-zero and not the default.
-        $q->textfragments = array(0 => '<p>Minimal question : For a minimal question, you must define a part with'
+        $q->textfragments = [0 => '<p>Minimal question : For a minimal question, you must define a part with'
                                   . ' (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>',
-                                  1 => '');
+                                  1 => ''];
         $q->numpart = 1;
         $q->defaultmark = 2;
         $p = self::make_a_formulas_part();
@@ -132,8 +149,8 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question with 3 parts.
-     * this version is non randomized to ease testing
+     * Make test 1
+     * @return qtype_formulas_question with 3 parts (non randomized to ease testing
      */
     public static function make_formulas_question_test1() {
         $q = self::make_a_formulas_question();
@@ -141,10 +158,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->name = 'test-1';
         $q->questiontext = '<p>Multiple parts : --{#1}--{#2}--{#3}</p>';
         $q->penalty = 0.3; // Non-zero and not the default.
-        $q->textfragments = array(0 => '<p>Multiple parts : --',
+        $q->textfragments = [0 => '<p>Multiple parts : --',
                 1 => '--',
                 2 => '--',
-                3 => '</p>');
+                3 => '</p>'];
         $q->numpart = 3;
         $q->defaultmark = 6;
         $p0 = self::make_a_formulas_part();
@@ -184,76 +201,78 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
+     * Gets the question form data for the test0 formulas question
+     * @return stdClass
+     */
+    public function get_formulas_question_form_data_test0() {
+        return $this->get_formulas_question_form_data_test1();
+    }
+
+    /**
      * Gets the question form data for the test1 formulas question
      * @return stdClass
      */
     public function get_formulas_question_form_data_test1() {
+        $arr = ['text' => '', 'format' => FORMAT_HTML];
         $form = new stdClass();
 
         $form->name = 'test-1';
-        $form->questiontext = array('text' => '<p>Multiple parts : --{#1}--{#2}--{#3}</p>',
-                'format' => FORMAT_HTML);
-        $form->generalfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->questiontext = ['text' => '<p>Multiple parts : --{#1}--{#2}--{#3}</p>', 'format' => FORMAT_HTML];
+        $form->generalfeedback = $arr;
         $form->defaultmark = 6;
         $form->penalty = 0.3;
         $form->varsrandom = '';
         $form->varsglobal = '';
         $form->answernumbering = 'abc';
-        $form->answer = array('5', '6', '7');
-        $form->answermark = array('2', '2', '2');
-        $form->numbox = array(1, 1, 1);
-        $form->placeholder = array('#1', '#2', '#3');
-        $form->postunit = array('', '', '');
-        $form->answertype = array(0, 0, 0);
-        $form->vars1 = array('', '', '');
-        $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
-        $form->vars2 = array('', '', '');
-        $form->unitpenalty = array(1, 1, 1);
-        $form->ruleid = array('1', '1', '1');
-        $form->otherrule = array('', '', '');
+        $form->answer = ['5', '6', '7'];
+        $form->answermark = ['2', '2', '2'];
+        $form->numbox = [1, 1, 1];
+        $form->placeholder = ['#1', '#2', '#3'];
+        $form->postunit = ['', '', ''];
+        $form->answertype = [0, 0, 0];
+        $form->vars1 = ['', '', ''];
+        $form->correctness = ['_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01'];
+        $form->vars2 = ['', '', ''];
+        $form->unitpenalty = [1, 1, 1];
+        $form->ruleid = ['1', '1', '1'];
+        $form->otherrule = ['', '', ''];
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->subqtext = array(
-            array('text' => 'This is first part.', 'format' => FORMAT_HTML),
-            array('text' => 'This is second part.', 'format' => FORMAT_HTML),
-            array('text' => 'This is third part.', 'format' => FORMAT_HTML),
-        );
-        $form->feedback = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->partcorrectfb = array(
-            array('text' => 'Part 1 correct feedback.', 'format' => FORMAT_HTML),
-            array('text' => 'Part 2 correct feedback.', 'format' => FORMAT_HTML),
-            array('text' => 'Part 3 correct feedback.', 'format' => FORMAT_HTML),
-        );
-        $form->partpartiallycorrectfb = array(
-            array('text' => 'Part 1 partially correct feedback.', 'format' => FORMAT_HTML),
-            array('text' => 'Part 2 partially correct feedback.', 'format' => FORMAT_HTML),
-            array('text' => 'Part 3 partially correct feedback.', 'format' => FORMAT_HTML),
-        );
-        $form->partincorrectfb = array(
-            array('text' => 'Part 1 incorrect feedback.', 'format' => FORMAT_HTML),
-            array('text' => 'Part 2 incorrect feedback.', 'format' => FORMAT_HTML),
-            array('text' => 'Part 3 incorrect feedback.', 'format' => FORMAT_HTML),
-        );
-        $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
-        $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->subqtext = [
+            ['text' => 'This is first part.', 'format' => FORMAT_HTML],
+            ['text' => 'This is second part.', 'format' => FORMAT_HTML],
+            ['text' => 'This is third part.', 'format' => FORMAT_HTML],
+        ];
+        $form->feedback = [$arr, $arr, $arr];
+        $form->partcorrectfb = [
+            ['text' => 'Part 1 correct feedback.', 'format' => FORMAT_HTML],
+            ['text' => 'Part 2 correct feedback.', 'format' => FORMAT_HTML],
+            ['text' => 'Part 3 correct feedback.', 'format' => FORMAT_HTML],
+        ];
+        $form->partpartiallycorrectfb = [
+            ['text' => 'Part 1 partially correct feedback.', 'format' => FORMAT_HTML],
+            ['text' => 'Part 2 partially correct feedback.', 'format' => FORMAT_HTML],
+            ['text' => 'Part 3 partially correct feedback.', 'format' => FORMAT_HTML],
+        ];
+        $form->partincorrectfb = [
+            ['text' => 'Part 1 incorrect feedback.', 'format' => FORMAT_HTML],
+            ['text' => 'Part 2 incorrect feedback.', 'format' => FORMAT_HTML],
+            ['text' => 'Part 3 incorrect feedback.', 'format' => FORMAT_HTML],
+        ];
+        $form->correctfeedback = $arr;
+        $form->partiallycorrectfeedback = $arr;
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->incorrectfeedback = $arr;
         $form->numhints = 2;
-        $form->hint = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->hintclearwrong = array('0', '0');
-        $form->hintshownumcorrect = array('0', '0');
+        $form->hint = [$arr, $arr];
+        $form->hintclearwrong = ['0', '0'];
+        $form->hintshownumcorrect = ['0', '0'];
         return $form;
     }
+
     /**
-     * @return qtype_formulas_question the question from the test1.xml file.
-     * Non randomized version for Behat tests.
+     * Make test 2
+     * @return qtype_formulas_question the question from the test1.xml file. Non randomized version for Behat tests.
      */
     public static function make_formulas_question_test2() {
         $q = self::make_a_formulas_question();
@@ -261,14 +280,15 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->name = 'test-2';
         $q->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
         $q->defaultmark = 8;
-        $q->penalty = 0.3; // Non-zero and not the default.
+        // Non-zero and not the default.
+        $q->penalty = 0.3;
         $q->numpart = 4;
-        $q->textfragments = array(0 => '<p>This question shows different display methods of the answer and unit box.</p>',
+        $q->textfragments = [0 => '<p>This question shows different display methods of the answer and unit box.</p>',
                 1 => '',
                 2 => '',
                 3 => '',
                 4 => '',
-                );
+                ];
         $q->varsrandom = '';
         $q->varsglobal = 'v = 40;dt = 3;s = v*dt;';
         $p0 = self::make_a_formulas_part();
@@ -291,7 +311,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->id = 16;
         $p2->partindex = 2;
         $p2->answermark = 2;
-        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';
+        // As postunit is empty {_u} should be ignored.
         $p2->answer = 'v';
         $p2->postunit = '';
         $q->parts[2] = $p2;
@@ -299,7 +320,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p3->id = 17;
         $p3->partindex = 3;
         $p3->answermark = 2;
-        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';
+        // As postunit is empty {_u} should be ignored.
         $p3->answer = 'v';
         $p3->postunit = '';
         $q->parts[3] = $p3;
@@ -343,8 +365,8 @@ class qtype_formulas_test_helper extends question_test_helper {
                 test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK;
         $qdata->options->incorrectfeedbackformat = FORMAT_HTML;
 
-        $qdata->options->answers = array(
-            14 => (object) array(
+        $qdata->options->answers = [
+            14 => (object) [
                 'id' => 14,
                 'placeholder' => '',
                 'answermark' => 2,
@@ -369,8 +391,8 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'partincorrectfb' => '',
                 'partincorrectfbformat' => FORMAT_HTML,
                 'partindex' => 0,
-            ),
-            15 => (object) array(
+            ],
+            15 => (object) [
                 'id' => 15,
                 'placeholder' => '',
                 'answermark' => 2,
@@ -395,8 +417,8 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'partincorrectfb' => '',
                 'partincorrectfbformat' => FORMAT_HTML,
                 'partindex' => 1,
-            ),
-            16 => (object) array(
+            ],
+            16 => (object) [
                 'id' => 16,
                 'placeholder' => '',
                 'answermark' => 2,
@@ -421,8 +443,8 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'partincorrectfb' => '',
                 'partincorrectfbformat' => FORMAT_HTML,
                 'partindex' => 2,
-            ),
-            17 => (object) array(
+            ],
+            17 => (object) [
                 'id' => 17,
                 'placeholder' => '',
                 'answermark' => 2,
@@ -447,27 +469,16 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'partincorrectfb' => '',
                 'partincorrectfbformat' => FORMAT_HTML,
                 'partindex' => 3,
-            ),
-        );
+            ],
+        ];
 
         $qdata->options->numpart = 4;
 
-        $qdata->hints = array(
-            1 => (object) array(
-                'hint' => 'Hint 1.',
-                'hintformat' => FORMAT_HTML,
-                'shownumcorrect' => 1,
-                'clearwrong' => 0,
-                'options' => 0,
-            ),
-            2 => (object) array(
-                'hint' => 'Hint 2.',
-                'hintformat' => FORMAT_HTML,
-                'shownumcorrect' => 1,
-                'clearwrong' => 1,
-                'options' => 1,
-            ),
-        );
+        $qdata->hints = [
+            1 => (object) ['hint' => 'Hint 1.', 'hintformat' => FORMAT_HTML,
+                'shownumcorrect' => 1, 'clearwrong' => 0, 'options' => 0],
+            2 => (object) ['hint' => 'Hint 2.', 'hintformat' => FORMAT_HTML,
+                'shownumcorrect' => 1, 'clearwrong' => 1, 'options' => 1]];
 
         return $qdata;
     }
@@ -476,136 +487,58 @@ class qtype_formulas_test_helper extends question_test_helper {
      * @return stdClass
      */
     public function get_formulas_question_form_data_test2() {
+        $arr = ['text' => '', 'format' => FORMAT_HTML];
         $form = new stdClass();
 
         $form->name = 'test-2';
-        $form->questiontext = array('text' => '<p>This question shows different display methods of the answer and unit box.</p>',
-                'format' => FORMAT_HTML);
-        $form->generalfeedback = array('text' => 'This is the general feedback.', 'format' => FORMAT_HTML);
+        $form->questiontext = ['text' => '<p>This question shows different display methods of the answer and unit box.</p>',
+                'format' => FORMAT_HTML];
+        $form->generalfeedback = ['text' => 'This is the general feedback.', 'format' => FORMAT_HTML];
         $form->defaultmark = 8;
         $form->penalty = 0.3;
         $form->varsrandom = '';
         $form->varsglobal = 'v = 40;dt = 3;s = v*dt;';
         $form->answernumbering = 'abc';
-        $form->answer = array(
-            0 => 'v',
-            1 => 'v',
-            2 => 'v',
-            3 => 'v',
-        );
-        $form->answermark = array(
-            0 => 2,
-            1 => 2,
-            2 => 2,
-            3 => 2,
-        );
-        $form->numbox = array(
-            0 => 1,
-            1 => 1,
-            2 => 1,
-            3 => 1,
-        );
-        $form->placeholder = array(
-            0 => '',
-            1 => '',
-            2 => '',
-            3 => '',
-        );
-        $form->postunit = array(
-            0 => 'm/s',
-            1 => 'm/s',
-            2 => '',
-            3 => '',
-        );
-        $form->answertype = array(
-            0 => 0,
-            1 => 0,
-            2 => 0,
-            3 => 0,
-        );
-        $form->vars1 = array(
-            0 => '',
-            1 => '',
-            2 => '',
-            3 => '',
-        );
-        $form->correctness = array(
-            0 => '_relerr < 0.01',
-            1 => '_relerr < 0.01',
-            2 => '_relerr < 0.01',
-            3 => '_relerr < 0.01'
-        );
-        $form->vars2 = array(
-            0 => '',
-            1 => '',
-            2 => '',
-            3 => '',
-        );
-        $form->unitpenalty = array(
-            0 => '1.0',
-            1 => '1.0',
-            2 => '1.0',
-            3 => '1.0',
-        );
-        $form->ruleid = array(
-            0 => 1,
-            1 => 1,
-            2 => 1,
-            3 => 1,
-        );
-        $form->otherrule = array(
-            0 => '',
-            1 => '',
-            2 => '',
-            3 => '',
-        );
+        $form->answer = [0 => 'v', 1 => 'v', 2 => 'v', 3 => 'v'];
+        $form->answermark = [0 => 2, 1 => 2, 2 => 2, 3 => 2];
+        $form->numbox = [0 => 1, 1 => 1, 2 => 1, 3 => 1];
+        $form->placeholder = [0 => '', 1 => '', 2 => '', 3 => ''];
+        $form->postunit = [0 => 'm/s', 1 => 'm/s', 2 => '', 3 => ''];
+        $form->answertype = [0 => 0, 1 => 0, 2 => 0, 3 => 0];
+        $form->vars1 = [0 => '', 1 => '', 2 => '', 3 => ''];
+        $form->correctness = [0 => '_relerr < 0.01', 1 => '_relerr < 0.01', 2 => '_relerr < 0.01', 3 => '_relerr < 0.01'];
+        $form->vars2 = [0 => '', 1 => '', 2 => '', 3 => ''];
+        $form->unitpenalty = [0 => '1.0', 1 => '1.0', 2 => '1.0', 3 => '1.0'];
+        $form->ruleid = [0 => 1, 1 => 1, 2 => 1, 3 => 1];
+        $form->otherrule = [0 => '', 1 => '', 2 => '', 3 => ''];
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->subqtext = array(
-            0 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
-            1 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            2 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            3 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
-        );
-        $form->feedback = array(
-            0 => array('text' => '', 'format' => FORMAT_HTML),
-            1 => array('text' => '', 'format' => FORMAT_HTML),
-            2 => array('text' => '', 'format' => FORMAT_HTML),
-            3 => array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->partcorrectfb = array(
-            0 => array('text' => '', 'format' => FORMAT_HTML),
-            1 => array('text' => '', 'format' => FORMAT_HTML),
-            2 => array('text' => '', 'format' => FORMAT_HTML),
-            3 => array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->partpartiallycorrectfb = array(
-            0 => array('text' => '', 'format' => FORMAT_HTML),
-            1 => array('text' => '', 'format' => FORMAT_HTML),
-            2 => array('text' => '', 'format' => FORMAT_HTML),
-            3 => array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->partincorrectfb = array(
-            0 => array('text' => '', 'format' => FORMAT_HTML),
-            1 => array('text' => '', 'format' => FORMAT_HTML),
-            2 => array('text' => '', 'format' => FORMAT_HTML),
-            3 => array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
-        $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->subqtext = [
+            0 => ['text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>',
+                'format' => FORMAT_HTML],
+            1 => ['text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>',
+                'format' => FORMAT_HTML],
+            2 => ['text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>',
+                'format' => FORMAT_HTML],
+            3 => ['text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>',
+                'format' => FORMAT_HTML]];
+        $form->feedback = [0 => $arr, 1 => $arr, 2 => $arr, 3 => $arr];
+        $form->partcorrectfb = [0 => $arr, 1 => $arr, 2 => $arr, 3 => $arr];
+        $form->partpartiallycorrectfb = [0 => $arr, 1 => $arr, 2 => $arr, 3 => $arr];
+        $form->partincorrectfb = [0 => $arr, 1 => $arr, 2 => $arr, 3 => $arr];
+        $form->correctfeedback = $arr;
+        $form->partiallycorrectfeedback = $arr;
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->incorrectfeedback = $arr;
         $form->numhints = 2;
-        $form->hint = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->hintclearwrong = array('0', '0');
-        $form->hintshownumcorrect = array('0', '0');
+        $form->hint = [$arr, $arr];
+        $form->hintclearwrong = ['0', '0'];
+        $form->hintshownumcorrect = ['0', '0'];
         return $form;
     }
 
     /**
+     * Make test 3
      * @return qtype_formulas_question the question with 0 as answer.
      */
     public static function make_formulas_question_test3() {
@@ -614,9 +547,11 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->name = 'test-3';
         $q->questiontext = '<p>This question has 0.0 as answer to test problem when answer is equal to 0.</p>';
 
-        $q->penalty = 0.3; // Non-zero and not the default.
-        $q->textfragments = array(0 => '<p>This question has 0 as answer to test problem when answer is equal to 0.0.</p>',
-                1 => '');
+        // Non-zero and not the default.
+        $q->penalty = 0.3;
+        $q->textfragments = [
+            0 => '<p>This question has 0 as answer to test problem when answer is equal to 0.0.</p>',
+            1 => ''];
         $q->numpart = 1;
         $q->defaultmark = 2;
         $p = self::make_a_formulas_part();
@@ -629,8 +564,8 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question the question from the test1.xml file.
-     * Randomized version.
+     * Make test 3
+     * @return qtype_formulas_question the question from the test1.xml file. Randomized version.
      */
     public static function make_formulas_question_test4() {
         $q = self::make_a_formulas_question();
@@ -638,21 +573,23 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->name = 'test-4';
         $q->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
         $q->defaultmark = 8;
-        $q->penalty = 0.3; // Non-zero and not the default.
+        // Non-zero and not the default.
+        $q->penalty = 0.3;
         $q->numpart = 4;
-        $q->textfragments = array(0 => '<p>This question shows different display methods of the answer and unit box.</p>',
+        $q->textfragments = [0 => '<p>This question shows different display methods of the answer and unit box.</p>',
                 1 => '',
                 2 => '',
                 3 => '',
                 4 => '',
-                );
+                ];
         $q->varsrandom = 'v = {20:100:10}; dt = {2:6};';
         $q->varsglobal = 's = v*dt;';
         $p0 = self::make_a_formulas_part();
         $p0->id = 18;
         $p0->partindex = 0;
         $p0->answermark = 2;
-        $p0->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
+        $p0->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';
+        // Combined unit.
         $p0->answer = 'v';
         $p0->postunit = 'm/s';
         $q->parts[0] = $p0;
@@ -660,7 +597,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->id = 19;
         $p1->partindex = 1;
         $p1->answermark = 2;
-        $p1->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
+        $p1->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';
+        // Separated unit.
         $p1->answer = 'v';
         $p1->postunit = 'm/s';
         $q->parts[1] = $p1;
@@ -668,7 +606,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->id = 20;
         $p2->partindex = 2;
         $p2->answermark = 2;
-        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';
+        // As postunit is empty {_u} should be ignored.
         $p2->answer = 'v';
         $p2->postunit = '';
         $q->parts[2] = $p2;
@@ -676,7 +615,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p3->id = 21;
         $p3->partindex = 3;
         $p3->answermark = 2;
-        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';
+        // As postunit is empty {_u} should be ignored.
         $p3->answer = 'v';
         $p3->postunit = '';
         $q->parts[3] = $p3;
@@ -689,76 +629,55 @@ class qtype_formulas_test_helper extends question_test_helper {
      * @return stdClass
      */
     public function get_formulas_question_form_data_test4() {
+        $arr = ['text' => '', 'format' => FORMAT_HTML];
         $form = new stdClass();
 
         $form->name = 'test-4';
-        $form->questiontext = array('text' => '<p>This question shows different display methods of the answer and unit box.</p>',
-                'format' => FORMAT_HTML);
-        $form->generalfeedback = array('text' => 'This is the general feedback.', 'format' => FORMAT_HTML);
+        $form->questiontext = ['text' => '<p>This question shows different display methods of the answer and unit box.</p>',
+                'format' => FORMAT_HTML];
+        $form->generalfeedback = ['text' => 'This is the general feedback.', 'format' => FORMAT_HTML];
         $form->defaultmark = 8;
         $form->penalty = 0.3;
         $form->varsrandom = 'v = {20:100:10}; dt = {2:6};';
         $form->varsglobal = 's = v*dt;';
         $form->answernumbering = 'abc';
-        $form->answer = array('v', 'v', 'v', 'v');
-        $form->answermark = array('2', '2', '2', '2');
-        $form->numbox = array(1, 1, 1, 1);
-        $form->placeholder = array('', '', '', '');
-        $form->postunit = array('m/s', 'm/s', '', '');
-        $form->answertype = array(0, 0, 0, 0);
-        $form->vars1 = array('', '', '', '');
-        $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
-        $form->vars2 = array('', '', '', '');
-        $form->unitpenalty = array(1, 1, 1, 1);
-        $form->ruleid = array('1', '1', '1', '1');
-        $form->otherrule = array('', '', '', '');
+        $form->answer = ['v', 'v', 'v', 'v'];
+        $form->answermark = ['2', '2', '2', '2'];
+        $form->numbox = [1, 1, 1, 1];
+        $form->placeholder = ['', '', '', ''];
+        $form->postunit = ['m/s', 'm/s', '', ''];
+        $form->answertype = [0, 0, 0, 0];
+        $form->vars1 = ['', '', '', ''];
+        $form->correctness = ['_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01'];
+        $form->vars2 = ['', '', '', ''];
+        $form->unitpenalty = [1, 1, 1, 1];
+        $form->ruleid = ['1', '1', '1', '1'];
+        $form->otherrule = ['', '', '', ''];
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->subqtext = array(
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
-        );
-        $form->feedback = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->partcorrectfb = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->partpartiallycorrectfb = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->partincorrectfb = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
-        $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->subqtext = [
+            ['text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML],
+            ['text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML],
+            ['text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML],
+            ['text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>',
+                 'format' => FORMAT_HTML]];
+        $form->feedback = [$arr, $arr, $arr, $arr];
+        $form->partcorrectfb = [$arr, $arr, $arr, $arr];
+        $form->partpartiallycorrectfb = [$arr, $arr, $arr, $arr];
+        $form->partincorrectfb = [$arr, $arr, $arr, $arr];
+        $form->correctfeedback = $arr;
+        $form->partiallycorrectfeedback = $arr;
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->incorrectfeedback = $arr;
         $form->numhints = 2;
-        $form->hint = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-        );
-        $form->hintclearwrong = array('0', '0');
-        $form->hintshownumcorrect = array('0', '0');
+        $form->hint = [$arr, $arr];
+        $form->hintclearwrong = ['0', '0'];
+        $form->hintshownumcorrect = ['0', '0'];
         return $form;
     }
 
     /**
+     * Make test 5
      * @return qtype_formulas_question with a multichoice answer.
      */
     public static function make_formulas_question_test5() {
@@ -767,9 +686,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->name = 'test-5';
         $q->questiontext = '<p>This question has a multichoice answer.</p>';
         $q->varsglobal = 'mychoices=["Dog","Cat","Bird","Fish"];';
-        $q->penalty = 0.3; // Non-zero and not the default.
-        $q->textfragments = array(0 => '<p>This question has a multichoice answer.</p>',
-                                  1 => '');
+        // Non-zero and not the default.
+        $q->penalty = 0.3;
+        $q->textfragments = [0 => '<p>This question has a multichoice answer.</p>',
+                                  1 => ''];
         $q->numpart = 1;
         $q->defaultmark = 2;
         $p = self::make_a_formulas_part();

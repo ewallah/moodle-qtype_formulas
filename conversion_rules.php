@@ -14,21 +14,41 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Conversion rules class
+ *
+ * @package   qtype_formulas
+ * @copyright 2013 Jean-Michel Vedrine
+ * @author    Hon Wai, Lau <lau65536@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
-/* Each entry of $basicunitconversionrule is a pair:
+/**
+ * Conversion rules class
+ *
+ * Each entry of $basicunitconvrule is a pair:
  *  - The first string is the name of the rule, which is used when editing the form
  *  - The second string is the actual rule that will be parsed and used as unit conversion
  *  - The array index is the unique id for the rule, which will be stored in the database
  * Note: the id from 0 to 99 are reserved, please do not use to create you own rules
+ *
+ * @package   qtype_formulas
+ * @copyright 2013 Jean-Michel Vedrine
+ * @author    Hon Wai, Lau <lau65536@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 class unit_conversion_rules {
-    private $basicunitconversionrule = array();
+    /** @var basicunitconvrule **/
+    private $basicunitconvrule = [];
 
-    // Initialize the internal conversion rule.
+    /**
+     * Initialize the internal conversion rule.
+     */
     public function __construct() {
-        $this->basicunitconversionrule[0] = array(get_string('none', 'qtype_formulas'), '');
-        $this->basicunitconversionrule[1] = array(get_string('commonsiunit', 'qtype_formulas'), '
+        $this->basicunitconvrule[0] = [get_string('none', 'qtype_formulas'), ''];
+        $this->basicunitconvrule[1] = [get_string('commonsiunit', 'qtype_formulas'), '
 m: k c d m u n p f;
 s: m u n p f;
 g: k m u n p f;
@@ -47,21 +67,25 @@ ohm: m k M G T P;
 F: m u n p f;
 T: k m u n p;
 H: k m u n p;
-');
-
-        /* You can define your own rules here, for instance:
-         * $this->basicunitconversionrule[100] = array(
-         * $this->basicunitconversionrule[1][0] + ' and your own conversion rules',
-         * $this->basicunitconversionrule[1][1] + '');
-         */
-
+'];
     }
 
+    /**
+     * Entry
+     *
+     * @param int $n
+     * @return array
+     */
     public function entry($n) {
-        return $this->basicunitconversionrule[$n];
+        return $this->basicunitconvrule[$n];
     }
 
+    /**
+     * All rules
+     *
+     * @return array
+     */
     public function allrules() {
-        return $this->basicunitconversionrule;
+        return $this->basicunitconvrule;
     }
 }

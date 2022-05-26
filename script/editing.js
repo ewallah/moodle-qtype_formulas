@@ -215,10 +215,8 @@ var formulasform = {
 
         http_request.onreadystatechange = function () {
             if (http_request.readyState == 4 && http_request.status == 200) {
-                //document.getElementById('xxx').innerHTML = http_request.responseText;
                 formulasform.vars = JSON.parse( http_request.responseText );
                 formulasform.show_dataset_and_preview('block');
-                //alert("message=" +JSON.stringify(formulasform.vars));
                 // Add the controls for the display of dataset and preview.
                 try { formulasform.update_dataset(); } catch (e) { alert(e); }
                 try { formulasform.update_statistics(); } catch (e) {}
@@ -283,8 +281,7 @@ var formulasform = {
         loc.innerHTML = '';
 
         var groupnames = this.get_groupnames();
-        //var quantities = ['N', 'mean', 'variance', 'min', 'Q1', 'median', 'Q3', 'max'];
-        //var quantities = ['min', 'max', 'mean', 'SD', 'N'];
+        //var quantities = ['N', 'mean', 'variance', 'min', 'Q1', 'SD', 'median', 'Q3', 'max'];
         var quantities = ['min', 'max'];
         var errors = [];
         var names = {};
@@ -469,7 +466,7 @@ var formulasform = {
             t = this.substitute_variables_in_text(t, mapping);
             t = '<div style="border: solid 1px #ddddff;"> ' + t + '</div>';
             if (ph.value == '') {
-                res += t;     // add the text at the end
+                res += t;     // Add the text at the end.
             } else {
                 res = res.replace('{' + ph.value + '}', t);
             }
