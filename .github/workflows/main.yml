@@ -25,9 +25,8 @@ jobs:
       - name: add plugin
         uses: actions/checkout@v2
         with:
-          repository: https://github.com/maths/moodle-qbehaviour_adaptivemultipart.git
+          repository: maths/moodle-qbehaviour_adaptivemultipart.git
           ref: main
-          token: ${{ secrets.PAT }}
           path: extras/qbehaviour_adaptivemultipart
 
       - name: setup PHP
