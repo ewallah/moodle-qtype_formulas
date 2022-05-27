@@ -550,6 +550,7 @@ class variables_test extends advanced_testcase {
             [false, '3==4'],
             [false, '3&&4'],
             [false, '3!'],
+            [false, '`'],
             [false, '@']];
         $v = $qv->vstack_create();
         $v = $qv->evaluate_assignments($v,
@@ -637,6 +638,7 @@ class variables_test extends advanced_testcase {
             ['3==4', ['3', '==4']],
             ['3&&4', ['3', '&&4']],
             ['3!', ['3', '!']],
+            ['`', ['', '`']],
             ['@', ['', '@']]];
         $v = $qv->vstack_create();
         $v = $qv->evaluate_assignments($v,

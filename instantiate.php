@@ -135,13 +135,13 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
  * @return array
  */
 function filter_redundant_names($data, $names, $a, $b) {
-    global $qv;
+    // global $qv;
     $tmp = [];
     if (!array_key_exists($a, $names)) {
         return null;
     }
-    foreach ($names[$a] as $n => $notused) {
-        if (check_include_name($data, $names, $a, $b, $n)) {
+    foreach ($names[$a] as $name) {
+        if (check_include_name($data, $names, $a, $b, $name)) {
             $tmp[] = $n;
         }
     }

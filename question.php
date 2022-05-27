@@ -533,10 +533,10 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     /**
      * Add the set of special variables that may be useful to check the correctness of the user input.
-     * @param $vars
-     * @param $a
-     * @param $r
-     * @param $diff
+     * @param object $vars
+     * @param int $a
+     * @param int $r
+     * @param number $diff
      * @param bool $isnumber
      */
     public function add_special_correctness_variables(&$vars, $a, $r, $diff, $isnumber) {
@@ -576,11 +576,11 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * Check whether the format of the response is correct and evaluate the corresponding expression
      * difference between coordinate and model answer.
      * null if format incorrect. Note: $r will have evaluated value.
-     * @param $vars
-     * @param $a
-     * @param $r
-     * @param $cfactor
-     * @param $gradingtype
+     * @param object $vars
+     * @param int $a
+     * @param int $r
+     * @param int $cfactor
+     * @param int $gradingtype
      * @return stdClass || null
      */
     public function compute_response_difference(&$vars, &$a, &$r, $cfactor, $gradingtype) {
@@ -613,8 +613,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /**
      * Grade response for part, and return a list with answer correctness and unit correctness.
      * @param qtype_formulas_part $part
-     * @param $response
-     * @param $checkunit
+     * @param object $response
+     * @param object $checkunit
      * @return array
      */
     public function grade_responses_individually($part, $response, &$checkunit) {

@@ -22,7 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+
 defined('MOODLE_INTERNAL') || die();
+
+use \advanced_testcase;
+use \stdClass;
 
 global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
@@ -38,7 +43,7 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  * @copyright  2013 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class questiontype_test extends advanced_testcase {
+class questiontype_test extends \advanced_testcase {
 
     /** @var tolerance */
     protected $tolerance = 0.00000001;
@@ -51,14 +56,14 @@ class questiontype_test extends advanced_testcase {
      * @return qtype_formulas_question the requested question object.
      */
     protected function get_test_formulas_question($which = null) {
-        return test_question_maker::make_question('formulas', $which);
+        return \test_question_maker::make_question('formulas', $which);
     }
 
     /**
      * Setup
      */
     protected function setUp():void {
-        $this->qtype = new qtype_formulas();
+        $this->qtype = new \qtype_formulas();
     }
 
     /**
@@ -190,15 +195,15 @@ class questiontype_test extends advanced_testcase {
         $this->setAdminUser();
 
         // Create a complete, in DB question to use.
-        $questiondata = test_question_maker::get_question_data('formulas', 'test2');
-        $formdata = test_question_maker::get_question_form_data('formulas', 'test2');
+        $questiondata = \test_question_maker::get_question_data('formulas', 'test2');
+        $formdata = \test_question_maker::get_question_form_data('formulas', 'test2');
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $generator->create_question_category([]);
 
         $formdata->category = "{$cat->id},{$cat->contextid}";
         $formdata->id = 0;
-        qtype_formulas_edit_form::mock_submit((array)$formdata);
-        $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
+        \qtype_formulas_edit_form::mock_submit((array)$formdata);
+        $form = \qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
         $form->id = 0;
         $this->assertTrue($form->is_validated());
 

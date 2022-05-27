@@ -97,7 +97,7 @@ class qtype_formulas_part {
     /** @var partcorrectfbformat */
     public $partcorrectfbformat;
 
-    /** @var partpartiallycorrectfb */
+    /** @var parpartcorrectfb */
     public $partpartiallycorrectfb;
 
     /** @var partpartiallycorrectfbformat */

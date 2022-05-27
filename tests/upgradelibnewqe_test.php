@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -35,7 +37,7 @@ require_once($CFG->dirroot . '/question/engine/upgrade/tests/helper.php');
  * @copyright  2009 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class upgradelibnewqe_test extends question_attempt_upgrader_test_base {
+class upgradelibnewqe_test extends \question_attempt_upgrader_test_base {
 
     /**
      * Test formulas deferredfeedbacksubmit wrong submit right

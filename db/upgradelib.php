@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class for converting attempt data for formulas questions when upgrading attempts
  *
@@ -75,13 +73,13 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
         $responses = $parsedanswer['responses'];
         foreach ($this->question->options->answers as $part) {
             if ($this->has_combined_unit_field($part)) {
-                $summary [] = $responses[$part->partindex . '_0'] . $responses[$part->partindex . '_1'];;
+                $summary[] = $responses[$part->partindex . '_0'] . $responses[$part->partindex . '_1'];;
             } else {
                 foreach (range(0, $part->numbox - 1) as $j) {
-                    $summary [] = $responses[$part->partindex . "_$j"];
+                    $summary[] = $responses[$part->partindex . "_$j"];
                 }
                 if ($this->has_separate_unit_field($part)) {
-                    $summary [] = $responses[$part->partindex . '_' . $part->numbox];
+                    $summary[] = $responses[$part->partindex . '_' . $part->numbox];
                 }
             }
         }
@@ -168,7 +166,6 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
      * @return array
      */
     protected function parse_answer($answer) {
-        $data = [];
         $lines = explode("\n", $answer);
         $counter = 0;
         $details = [];

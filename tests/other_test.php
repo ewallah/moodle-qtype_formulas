@@ -91,15 +91,4 @@ class other_test extends \advanced_testcase {
         $aunit = new \answer_unit_conversion;
         $aunit->check_convertibility('', 'c');
     }
-
-    /**
-     * Test renderer.
-     */
-    public function test_renderer() {
-        global $CFG, $PAGE;
-        require_once("$CFG->dirroot/question/type/formulas/renderer.php");
-
-        $renderer = new \qtype_formulas_renderer($PAGE, null);
-        $renderer->head_code(null);
-    }
 }

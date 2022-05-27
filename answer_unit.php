@@ -23,8 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * This class provides methods to check whether an input unit is convertible to a unit in a list.
  *

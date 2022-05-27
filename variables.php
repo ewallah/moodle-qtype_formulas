@@ -22,15 +22,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Mycout
  * Helper function to emulate the behaviour of the count() function before php 7.2.
  * Needed because a string is passed as parameter in many places in the code.
  * @param number $a
  * @return number
- */function mycount($a) {
+ */
+function mycount($a) {
     if ($a === null) {
         return 0;
     } else {
@@ -146,7 +145,7 @@ function lcm($a, $b) {
 /**
  * Sigfig
  * @param number $number
- * @param int $precission
+ * @param int $precision
  * @return number
  */
 function sigfig($number, $precision) {
@@ -1490,12 +1489,13 @@ class qtype_formulas_variables {
             // Forward the error.
             throw new Exception($res);
         }
+        // Todo: review as $a never used.
         // Now, it should contains pure code of mathematical expression and all numerical variables are stored in $a.
         $results = [];
         foreach ($all as $a) {
             $res = null;
             try {
-                // TODO: get rid of eval function
+                // TODO: get rid of eval function.
                 eval('$res = ' . implode(' ', $splitted) . ';');
             } catch (Throwable $t) {
                 throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
@@ -1506,7 +1506,6 @@ class qtype_formulas_variables {
             // Make sure it is a number, not other data type such as bool.
             $results[] = floatval($res);
         }
-
         return $results;
     }
 
