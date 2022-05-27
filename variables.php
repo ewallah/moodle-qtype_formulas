@@ -17,17 +17,20 @@
 /**
  * The qtype_formulas_variables class is used to parse and evaluate variables.
  *
- * @copyright &copy; 2010-2011 Hon Wai, Lau
- * @author Hon Wai, Lau <lau65536@gmail.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
+ * @package    qtype_formulas
+ * @copyright  2010-2011 Hon Wai, Lau
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-// Helper function to emulate the behaviour of the count() function
-// before php 7.2.
-// Needed because a string is passed as parameter in many places in the code.
-function mycount($a) {
+/**
+ * Mycout
+ * Helper function to emulate the behaviour of the count() function before php 7.2.
+ * Needed because a string is passed as parameter in many places in the code.
+ * @param number $a
+ * @return number
+ */function mycount($a) {
     if ($a === null) {
         return 0;
     } else {
@@ -39,6 +42,11 @@ function mycount($a) {
     }
 }
 
+/**
+ * Fact
+ * @param number $n
+ * @return number
+ */
 function fact($n) {
     $n = (int) $n;
     if ( $n < 2 ) {
@@ -52,6 +60,12 @@ function fact($n) {
     return $return;
 }
 
+/**
+ * Npr
+ * @param number $n
+ * @param number $r
+ * @return number
+ */
 function npr($n, $r) {
     $n = (int)$n;
     $r = (int)$r;
@@ -68,6 +82,13 @@ function npr($n, $r) {
     return $return;
 }
 
+
+/**
+ * Ncr
+ * @param number $n
+ * @param number $r
+ * @return number
+ */
 function ncr($n, $r) {
     $n = (int)$n;
     $r = (int)$r;
@@ -84,6 +105,13 @@ function ncr($n, $r) {
     return $return;
 }
 
+
+/**
+ * Gcd
+ * @param number $a
+ * @param number $b
+ * @return number
+ */
 function gcd($a, $b) {
     if ($a < 0) {
         $a = 0 - $a;
@@ -105,10 +133,22 @@ function gcd($a, $b) {
     return $a;
 }
 
+/**
+ * Lcm
+ * @param number $a
+ * @param number $b
+ * @return number
+ */
 function lcm($a, $b) {
     return $a * $b / gcd($a, $b);
 }
 
+/**
+ * Sigfig
+ * @param number $number
+ * @param int $precission
+ * @return number
+ */
 function sigfig($number, $precision) {
     if ($number == 0) {
         $decimalplaces = $precision - 1;
@@ -123,6 +163,8 @@ function sigfig($number, $precision) {
 }
 
 /**
+ * The qtype_formulas_variables class is used to parse and evaluate variables.
+ *
  * Class contains methods to parse variables text and evaluate variables. Results are stored in the $vstack
  * The functions can be roughly classified into 5 categories:
  *
@@ -131,11 +173,26 @@ function sigfig($number, $precision) {
  * - parse and instantiate random variable
  * - evaluate assignments, general expression and numerical expression.
  * - evaluate algebraic formula
+ * There are two main forms of random variables, specified in the form 'variable = expression;'
+ * The first form is declared as a set of either number, string, list of number and list of string.
+ * One element will be drawn from the set when instantiating. Note that it allow a range format of numbers
+ * Another one is the shuffling of a list of number or string.
+ * e.g. A={1,2,3}; B={1, 3:5, 8:9:.1}; C={"A","B"}; D={[1,4],[1,9]}; F=shuffle([0:10]);
+ *
+ * @package    qtype_formulas
+ * @copyright  2010-2011 Hon Wai, Lau
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_variables {
-    private static $maxdataset = 2e9;      // It is the upper limit for the exhaustive enumeration.
+    /** @var max data set with the upper limit for the exhaustive enumeration. **/
+    private static $maxdataset = 2e9;
+
+    /** @var list maximum size. **/
     private static $listmaxsize = 1000;
 
+    /**
+     * Initiate function list
+     */
     private function initialize_function_list() {
         $this->func_const = array_flip(['pi']);
         $this->func_unary = array_flip(['abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil', 'cos', 'cosh', 'deg2rad',
@@ -156,11 +213,9 @@ class qtype_formulas_variables {
         // Natural log and log with base 10, no log allowed to avoid ambiguity.
     }
 
-    public function __construct() {
-        $this->initialize_function_list();
-    }
-
     /**
+     * Constructor
+     *
      * Data structure of the variables stack object, containing:
      * - all is an array with name (key) => data (value),
      *   - data is and object contains the type information and variable value.
@@ -175,15 +230,26 @@ class qtype_formulas_variables {
      * (list of number, list of string)
      * Note the type number 'n' has a "constantness" associated to it. The value is of type string if it is constant
      */
+    public function __construct() {
+        $this->initialize_function_list();
+    }
 
-    // This function must be called to initial a variable stack, and the returned variable is required by most function.
+    /**
+     * This function must be called to initial a variable stack, and the returned variable is required by most function.
+     * @return object
+     */
     public function vstack_create() {
         return (object)['idcounter' => 0, 'all' => []];
     }
 
-    // Return a serialized string of vstack with type n, s, ln, ls. It can be reconstructed by calling evaluate_assignments().
+    /**
+     * Vstack get serialization
+     *
+     * @param object $vstack
+     * @return string of vstack with type n, s, ln, ls. It can be reconstructed by calling evaluate_assignments().
+     */
     public function vstack_get_serialization(&$vstack) {
-        $ctype = array_flip(explode(',', 'n,s,ln,ls'));
+        $ctype = array_flip(['n', 's', 'ln', 'ls']);
         $vstr = '';
         foreach ($vstack->all as $name => $data) {
             if (array_key_exists($data->type, $ctype)) {
@@ -200,7 +266,13 @@ class qtype_formulas_variables {
         return $vstr;
     }
 
-    // Return the size of sample space, or null if it is too large. The purpose of this number is to instantiate all random dataset.
+    /**
+     * Vstack number of datasest
+     *
+     * The purpose of this number is to instantiate all random dataset.
+     * @param object $vstack
+     * @return number || null the size of sample space, or null if it is too large.
+     */
     public function vstack_get_number_of_dataset(&$vstack) {
         $numdataset = 1;
         foreach ($vstack->all as $name => $data) {
@@ -215,7 +287,12 @@ class qtype_formulas_variables {
         return $numdataset;
     }
 
-    // Return whether there is shuffled data.
+    /**
+     * Vstack contains shuffled data
+     *
+     * @param object $vstack
+     * @return boolean
+     */
     public function vstack_get_has_shuffle(&$vstack) {
         foreach ($vstack->all as $name => $data) {
             if ($data->type[0] == 'zh') {
@@ -225,15 +302,36 @@ class qtype_formulas_variables {
         return false;
     }
 
-    // Return the list of variables stored in the vstack.
+    /**
+     * Vstack get names
+     *
+     * @param object $vstack
+     * @return array the list of variables stored in the vstack
+     */
     public function vstack_get_names(&$vstack) {
         return array_keys($vstack->all);
     }
 
+    /**
+     * Vstack get variable
+     *
+     * @param object $vstack
+     * @param string $name
+     * @return string || null
+     */
     public function vstack_get_variable(&$vstack, $name) {
         return array_key_exists($name, $vstack->all) ? $vstack->all[$name] : null;
     }
 
+    /**
+     * Vstack update variable
+     *
+     * @param object $vstack
+     * @param string $name
+     * @param int $index
+     * @param string $type
+     * @param number $value
+     */
     public function vstack_update_variable(&$vstack, $name, $index, $type, $value) {
         if ($index === null) {
             if ($type[0] == 'l') {
@@ -262,7 +360,7 @@ class qtype_formulas_variables {
                     }
                 }
             }
-            $vstack->all[$name] = (object)array('type' => $type, 'value' => $value);
+            $vstack->all[$name] = (object)['type' => $type, 'value' => $value];
         } else {
             $list = &$vstack->all[$name];
             if ($list->type[0] != 'l') {
@@ -279,15 +377,35 @@ class qtype_formulas_variables {
         }
     }
 
+    /**
+     * Vstack mark current top
+     *
+     * @param object $vstack
+     * @return object
+     */
     private function vstack_mark_current_top(&$vstack) {
-        return (object)array('idcounter' => $vstack->idcounter, 'sz' => mycount($vstack->all));
+        return (object)['idcounter' => $vstack->idcounter, 'sz' => mycount($vstack->all)];
     }
 
+    /**
+     * Vstack restore previous top
+     *
+     * @param object $vstack
+     * @param object $previoustop
+     */
     private function vstack_restore_previous_top(&$vstack, $previoustop) {
         $vstack->all = array_slice($vstack->all, 0, $previoustop->sz);
         $vstack->idcounter = $previoustop->idcounter;
     }
 
+    /**
+     * Add temporary variable
+     *
+     * @param object $vstack
+     * @param string $type
+     * @param number $value
+     * @return string
+     */
     private function vstack_add_temporary_variable(&$vstack, $type, $value) {
         $name = '@' . $vstack->idcounter;
         $this->vstack_update_variable($vstack, $name, null, $type, $value);
@@ -295,6 +413,12 @@ class qtype_formulas_variables {
         return $name;
     }
 
+    /**
+     * Clean temporary vstack
+     *
+     * @param object $vstack
+     * @return object
+     */
     private function vstack_clean_temporary(&$vstack) {
         $tmp = $this->vstack_create();
         foreach ($vstack->all as $name => $data) {
@@ -306,16 +430,20 @@ class qtype_formulas_variables {
     }
 
     /**
+     * All placeholders substituted by variable value
+     *
      * These functions replace the string, number, fixed range, function and variable name by placeholder (start with @)
      * Also, the reverse substitution function also available for different situation.
      * Note that string and fixed range are not treated as placeholder, so text with them cannot be fully recovered.
+     * @param object $vstack
+     * @param string $text
+     * @return string the text with the variables, or evaluable expressions, substituted by their values.
      */
-
-    // Return the text with the variables, or evaluable expressions, substituted by their values.
     public function substitute_variables_in_text(&$vstack, $text) {
         $funcpattern = '/(\{=[^{}]+\}|\{([A-Za-z][A-Za-z0-9_]*)(\[([0-9]+)\])?\})/';
         $results = [];
-        $ts = explode("\n`", $text);     // The ` is the separator, so split it first.
+        // The backtick is the separator, so split it first.
+        $ts = explode("\n`", $text);
         foreach ($ts as $text) {
             $splitted = explode("\n`", preg_replace($funcpattern, "\n`$1\n`", $text));
             for ($i = 1; $i < mycount($splitted); $i += 2) {
@@ -323,7 +451,8 @@ class qtype_formulas_variables {
                     $expr = substr($splitted[$i], $splitted[$i][1] == '=' ? 2 : 1 , -1);
                     $res = $this->evaluate_general_expression($vstack, $expr);
                     if ($res->type != 'n' && $res->type != 's') {
-                        throw new Exception();     // Skip for other type.
+                        // Skip for other type.
+                        throw new Exception();
                     }
                     $splitted[$i] = $res->value;
                 } catch (Exception $e) {
@@ -336,7 +465,13 @@ class qtype_formulas_variables {
         return implode("\n`", $results);
     }
 
-    // Return the original string by substituting back the placeholders (given by variables in $vstack) in the input $text.
+    /**
+     * All placeholders substituted by original string
+     *
+     * @param object $vstack
+     * @param string $text
+     * @return string
+     */
     private function substitute_placeholders_in_text(&$vstack, $text) {
         $splitted = explode('`', preg_replace('/(@[0-9]+)/', '`$1`', $text));
         for ($i = 1; $i < mycount($splitted); $i += 2) {
@@ -346,8 +481,13 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // If substitute_variables_by_placeholders() was used for $text, then this function forward
-    // the value of type 'v' to the actual variable value.
+    /**
+     * All placeholders substituted by variable value
+     *
+     * @param object $vstack
+     * @param string $text
+     * @return string
+     */
     private function substitute_vname_by_variables(&$vstack, $text) {
         $splitted = explode('`', preg_replace('/(@[0-9]+)/', '`$1`', $text));
         $appearedvars = [];     // Reuse the temporary variable if possible.
@@ -369,7 +509,13 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // Replace the strings in the $text.
+    /**
+     * All strings substituted by placeholders
+     *
+     * @param object $vstack
+     * @param string $text
+     * @return string
+     */
     private function substitute_strings_by_placholders(&$vstack, $text) {
         $text = stripcslashes($text);
         $splitted = explode("\"", $text);
@@ -390,7 +536,13 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // Replace the fixed range of the form [a:b] in the $text by variables with new names in $tmpnames, and add it to the $vars.
+    /**
+     * All fixed ranges substituted by placeholders
+     *
+     * @param object $vstack
+     * @param string $text
+     * @return string
+     */
     private function substitute_fixed_ranges_by_placeholders(&$vstack, $text) {
         $rangepattern = '/(\[[^\]]+:[^\]]+\])/';
         $splitted = explode('`', preg_replace($rangepattern, '`$1`', $text));
@@ -415,7 +567,13 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // Return a string with all (positive) numbers substituted by placeholders. The information of placeholders is stored in v.
+    /**
+     * All members substituted by placeholders
+     *
+     * @param object $vstack
+     * @param string $text
+     * @return string
+     */
     private function substitute_numbers_by_placeholders(&$vstack, $text) {
         $numpattern = '/(^|[\]\[)(}{, ?:><=~!|&%^\/*+-])(([0-9]+\.?[0-9]*|[0-9]*\.?[0-9]+)([eE][-+]?[0-9]+)?)/';
         $splitted = explode('`', preg_replace($numpattern, '$1`$2`', $text));
@@ -426,8 +584,15 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // Return a string with all functions substituted by placeholders. The information of placeholders is stored in v.
-    private function substitute_functions_by_placeholders(&$vstack, $text, $internal=false) {
+    /**
+     * All functions substituted by placeholders
+     *
+     * @param object $vstack
+     * @param string $text
+     * @param boolean $internal
+     * @return string
+     */
+    private function substitute_functions_by_placeholders(&$vstack, $text, $internal = false) {
         $funcpattern = '/([a-z][a-z0-9_]*)(\s*\()/';
         $funclists = $internal ? $this->func_all : $this->func_algebraic;
         $type = $internal ? 'F' : 'f';
@@ -442,7 +607,14 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // Return a string with all variables substituted by placeholders. The information of placeholders is stored in v.
+    /**
+     * All constants substituted by placeholders
+     *
+     * @param object $vstack
+     * @param string $text
+     * @param boolean $preserve
+     * @return string
+     */
     private function substitute_constants_by_placeholders(&$vstack, $text, $preserve) {
         $varpattern = '/([A-Za-z][A-Za-z0-9_]*)/';
         $splitted = explode('`', preg_replace($varpattern, '`$1`', $text));
@@ -457,8 +629,15 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // Return a string with all variables substituted by placeholders. The information of placeholders is stored in v.
-    private function substitute_variables_by_placeholders(&$vstack, $text, $internal=false) {
+    /**
+     * All variables substituted by placeholders
+     *
+     * @param object $vstack
+     * @param string $text
+     * @param boolean $internal
+     * @return string
+     */
+    private function substitute_variables_by_placeholders(&$vstack, $text, $internal = false) {
         $varpattern = $internal ? '/([A-Za-z_][A-Za-z0-9_]*)/' : '/([A-Za-z][A-Za-z0-9_]*)/';
         $funclists = $internal ? $this->func_all : $this->func_algebraic;
         $splitted = explode('`', preg_replace($varpattern, '`$1`', $text));
@@ -472,7 +651,13 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // Parse the number or range in the format of start(:stop(:interval)). return null if error.
+    /**
+     * Parse the number or range in the format of start(:stop(:interval))
+     *
+     * @param object $vstack
+     * @param string $expression
+     * @return object || null
+     */
     private function parse_fixed_range(&$vstack, $expression) {
         $ex = explode(':', $expression);
         if (mycount($ex) > 3) {
@@ -500,18 +685,15 @@ class qtype_formulas_variables {
         if ($ex[0] > $ex[1] || $ex[2] <= 0) {
             return null;
         }
-        return (object)array('numelement' => ceil( ($ex[1] - $ex[0]) / $ex[2] ), 'element' => $ex, 'numpart' => $numpart);
+        return (object)['numelement' => ceil( ($ex[1] - $ex[0]) / $ex[2] ), 'element' => $ex, 'numpart' => $numpart];
     }
 
     /**
-     * There are two main forms of random variables, specified in the form 'variable = expression;'
-     * The first form is declared as a set of either number, string, list of number and list of string.
-     * One element will be drawn from the set when instantiating. Note that it allow a range format of numbers
-     * Another one is the shuffling of a list of number or string.
-     * e.g. A={1,2,3}; B={1, 3:5, 8:9:.1}; C={"A","B"}; D={[1,4],[1,9]}; F=shuffle([0:10]);
+     * Parse the random variables $assignments for later instantiation of a dataset
+     *
+     * @param string  $text
+     * @return object
      */
-
-    // Parse the random variables $assignments for later instantiation of a dataset. Throw on parsing error.
     public function parse_random_variables($text) {
         $vstack = $this->vstack_create();
         $text = $this->substitute_strings_by_placholders($vstack, $text);
@@ -546,7 +728,7 @@ class qtype_formulas_variables {
                 }
 
                 // Check whether the expression contains only the valid character set.
-                $var = (object)array('numelement' => 0, 'elements' => []);
+                $var = (object)['numelement' => 0, 'elements' => []];
                 if ($expression[0] == '{') {
                     $allowableoperatorchar = '-+*/:@0-9,\s}{\]\[';  // Restricted set, prevent too many calculations.
                     if (!preg_match('~^['.$allowableoperatorchar.']*$~', $expression)) {
@@ -578,7 +760,8 @@ class qtype_formulas_variables {
                             $element = $result->value;
                             $numelement = 1;
                         }
-                        if ($type == 'n') { // Special handle for number, because it can be specified as a range.
+                        if ($type == 'n') {
+                            // Special handle for number, because it can be specified as a range.
                             $result = $this->parse_fixed_range($vstack, $ele);
                             if ($result === null) {
                                 throw new Exception(get_string('error_syntax', 'qtype_formulas'));
@@ -603,8 +786,9 @@ class qtype_formulas_variables {
                     if ($result === null || $result->type[0] != 'l') {
                         throw new Exception(get_string('error_syntax', 'qtype_formulas'));
                     }
-                    $type = 'zh'.$result->type;
-                    $var->numelement = mycount($result->value);   // The actual number should be a!, but it will not be used anyway.
+                    $type = 'zh' . $result->type;
+                    // The actual number should be a!, but it will not be used anyway.
+                    $var->numelement = mycount($result->value);
                     $var->elements = $result->value;
                 } else {
                     throw new Exception(get_string('error_syntax', 'qtype_formulas'));
@@ -623,7 +807,13 @@ class qtype_formulas_variables {
         return $this->vstack_clean_temporary($vstack);
     }
 
-    // Instantiate a particular variables set given by datasetid (-1 for random). Another vstack of will be returned.
+    /**
+     * Instantiate a particular variables by id
+     *
+     * @param object $vstack
+     * @param int $datasetid (-1 for random)
+     * @return object
+     */
     public function instantiate_random_variables(&$vstack, $datasetid = -1) {
         $numdataset = $this->vstack_get_number_of_dataset($vstack);
         $datasetid = ($datasetid >= 0 && $datasetid < self::$maxdataset) ? $datasetid % $numdataset : -1;
@@ -658,8 +848,13 @@ class qtype_formulas_variables {
         return $newstack;
     }
 
-    // This function can evaluate mathematical formula, manipulate lists of number and concatenate strings
-    // The $vars contains variables evaluated previously and it will return the evaluated variables in $text.
+    /**
+     * Evaluate mathematical formula, manipulate lists of number and concatenate strings
+     *
+     * @param object $vars contains variables evaluated previously
+     * @param string $text
+     * @return object the evaluated variables in $text
+     */
     public function evaluate_assignments($vars, $text) {
         $vstack = clone $vars;
         $text = $this->substitute_strings_by_placholders($vstack, $text);
@@ -677,7 +872,13 @@ class qtype_formulas_variables {
         return $this->vstack_clean_temporary($vstack);
     }
 
-    // Return the evaluated general expression by calling evaluate_assignments().
+    /**
+     * Return the evaluated general expression by calling evaluate_assignments().
+     *
+     * @param object $vars
+     * @param string $expression
+     * @return object || null
+     */
     public function evaluate_general_expression($vars, $expression) {
         $vstack = clone $vars;
         $expression = $this->substitute_strings_by_placholders($vstack, $expression);
@@ -694,7 +895,13 @@ class qtype_formulas_variables {
         return $this->evaluate_general_expression_substituted_recursively($vstack, $expression);
     }
 
-    // Parse and evaluate the substituted assignments one by one.
+    /**
+     * Parse and evaluate the substituted assignments one by one.
+     *
+     * @param object $vstack
+     * @param string $subtext
+     * @param int $acounter
+     */
     private function evaluate_assignments_substituted(&$vstack, $subtext, &$acounter) {
         $cursor = 0;
         while ($cursor < strlen($subtext)) {
@@ -735,7 +942,8 @@ class qtype_formulas_variables {
                 } else {
                     $nextcursor = strpos($subtext, ';', $header->closeloc);
                     if ($nextcursor === false) {
-                        $nextcursor = strlen($subtext);    // If no end separator, use all text until the end.
+                        // If no end separator, use all text until the end.
+                        $nextcursor = strlen($subtext);
                     }
                     $innertext = substr($subtext, $header->closeloc + 1, $nextcursor - $header->closeloc - 1);
                     $cursor = $nextcursor + 1;
@@ -753,7 +961,8 @@ class qtype_formulas_variables {
                 // Find the next assignment and then advance the cursor after the ';'.
                 $nextcursor = strpos($subtext, ';', $cursor);
                 if ($nextcursor === false) {
-                    $nextcursor = strlen($subtext);    // If no end separator, use all text until the end.
+                    // If no end separator, use all text until the end.
+                    $nextcursor = strlen($subtext);
                 }
                 $assignment = substr($subtext, $cursor, $nextcursor - $cursor);
                 $cursor = $nextcursor + 1;
@@ -769,7 +978,8 @@ class qtype_formulas_variables {
                 $ex = explode('=', $assignment, 2);
                 $name = trim($ex[0]);
                 if (mycount($ex) == 1 && strlen($name) == 0) {
-                    continue;   // If empty assignment.
+                    // If empty assignment.
+                    continue;
                 }
                 if (mycount($ex) != 2) {
                     throw new Exception(get_string('error_syntax', 'qtype_formulas'));
@@ -795,7 +1005,13 @@ class qtype_formulas_variables {
         }
     }
 
-    // Evaluate expression with list operation, special function and numerical expression.
+    /**
+     * Evaluate expression with list operation, special function and numerical expression.
+     *
+     * @param object $vstack
+     * @param string $expression
+     * @return object || null
+     */
     private function evaluate_general_expression_substituted_recursively(&$vstack, $expression) {
         $expression = trim($expression);
         if (strlen($expression) == 0) {
@@ -818,22 +1034,29 @@ class qtype_formulas_variables {
                 continue;
             }
             // Assume the expression is purely numerical and then evaluate.
-            $nums = $this->evaluate_numerical_expression(array($vstack), $expression);
-            $result = (object)array('type' => 'n', 'value' => $nums[0]);
+            $nums = $this->evaluate_numerical_expression([$vstack], $expression);
+            $result = (object)['type' => 'n', 'value' => $nums[0]];
             break;
         }
         $this->vstack_restore_previous_top($vstack, $curtop);
         return $result;
     }
 
-    // Return the name and index (if any) on the left hand side of assignment. if error, return null.
+    /**
+     * Return the name and index (if any) on the left hand side of assignment.
+     *
+     * @param object $vstack
+     * @param string $name
+     * @return array || null
+     */
     private function get_variable_name_index(&$vstack, $name) {
         if (!preg_match('/^(@[0-9]+)(\[(@[0-9]+)\])?$/', $name, $matches)) {
             return null;
         }
         $n = $this->vstack_get_variable($vstack, $matches[1]);
         if ($n->type != 'v' || $n->value[0] == '_') {
-            return null;   // It must be a variable name and not prefixed by "_".
+            // It must be a variable name and not prefixed by "_".
+            return null;
         }
         if (!isset($matches[3])) {
             return [$n->value, null];
@@ -850,7 +1073,13 @@ class qtype_formulas_variables {
         }
     }
 
-    // Parse the algebraic variable, which is the same as the set of number for random variable.
+    /**
+     * Parse the algebraic variable, which is the same as the set of number for random variable.
+     *
+     * @param object $vstack
+     * @param string $expression
+     * @return object || null
+     */
     public function parse_algebraic_variable(&$vstack, $expression) {
         $expression = trim($expression);
         if (strlen($expression) == 0) {
@@ -876,11 +1105,16 @@ class qtype_formulas_variables {
             $numelement += $res->numelement;
             $elements[] = $res->element;
         }
-        return (object)array('type' => 'zn', 'value' => (object)array('numelement' => $numelement, 'elements' => $elements));
+        return (object)['type' => 'zn', 'value' => (object)['numelement' => $numelement, 'elements' => $elements]];
     }
 
-    // Handle the array by replacing it by variable, if necessary, evaluate subexpression by putting it in the $vstack.
-    // @return boolean of whether this syntax is found or not.
+    /**
+     * Handle the array by replacing it by variable, if necessary, evaluate subexpression by putting it in the $vstack.
+     *
+     * @param object $vstack
+     * @param string $expression
+     * @return boolean
+     */
     private function handle_square_bracket_syntax(&$vstack, &$expression) {
         $res = $this->get_expressions_in_bracket($expression, 0, '[');
         if ($res == null) {
@@ -918,8 +1152,13 @@ class qtype_formulas_variables {
         return true;
     }
 
-    // Handle the few function for the array of number or string
-    // @return boolean of whether this syntax is found or not.
+    /**
+     * Handle the special functions
+     *
+     * @param object $vstack
+     * @param string $expression
+     * @return boolean
+     */
     private function handle_special_functions(&$vstack, &$expression) {
         $splitted = explode('`', preg_replace('/(@[0-9]+)/', '`$1`', $expression));
         $loc = 0;
@@ -957,7 +1196,8 @@ class qtype_formulas_variables {
                 if (!($sz == 2 && ($typestr == 'n,n' || $typestr == 'n,s') && is_string($values[0]))) {
                     break;
                 }
-                $n = intval($values[0]);  // Note that if $values[0]===string means that it is constant number.
+                // Note that if $values[0]===string means that it is constant number.
+                $n = intval($values[0]);
                 if ($n < 1 || $n > self::$listmaxsize) {
                     throw new Exception(get_string('error_vars_array_size', 'qtype_formulas'));
                 }
@@ -965,7 +1205,8 @@ class qtype_formulas_variables {
                 return true;
             case 'len':
                 if (!($sz == 1 && $typestr[0] == 'l')) {
-                    break;  // Note: type 'n' with strval is treated as constant.
+                    // Note: type 'n' with strval is treated as constant.
+                    break;
                 }
                 $this->replace_middle($vstack, $expression, $l, $r, 'n', strval(mycount($values[0])));
                 return true;
@@ -991,7 +1232,8 @@ class qtype_formulas_variables {
                         break;
                     }
                 }
-                $v = intval($values[0] >= 0 && $values[0] < $sz ? $values[0] : 0);    // Always choose 0 if index out of range.
+                // Always choose 0 if index out of range.
+                $v = intval($values[0] >= 0 && $values[0] < $sz ? $values[0] : 0);
                 $this->replace_middle($vstack, $expression, $l, $r, $type, $pool[$v]);
                 return true;
             case 'sort':
@@ -1071,7 +1313,7 @@ class qtype_formulas_variables {
                     }
                     if (array_key_exists($values[0], $this->binary_op_map)) {
                         $value = array_map(function ($a, $b) use ($values) {
-                            // TODO: plus minus .
+                            // TODO: plus minus.
                             return eval( 'return floatval(($a)'.$values[0].'($b));');
                         }, $values[1], $values[2]);
                     } else if (array_key_exists($values[0], $this->func_binary)) {
@@ -1190,7 +1432,8 @@ class qtype_formulas_variables {
                 $this->replace_middle($vstack, $expression, $l, $r, 'ln', $diff);
                 return true;
             default:
-                return false;   // If no match, then the expression will be evaluated as a mathematical expression.
+                // If no match, then the expression will be evaluated as a mathematical expression.
+                return false;
         }
         throw new Exception(get_string('error_func_param', 'qtype_formulas', $data->value));
     }
@@ -1198,17 +1441,18 @@ class qtype_formulas_variables {
     /**
      * Evaluate the $expression with all variables given in the $vstacks. May throw error
      *
-     * @param array $vstacks array of vstack data structure. Each vstack will be used one by one
+     * @param object $vstacks array of vstack data structure. Each vstack will be used one by one
      * @param string $expression The expression being evaluated
      * @param string $functype the function type, either 'F' for internal use, or 'f' for external use
-     * @return The evaluated array of number, each number corresponds to one vstack
+     * @return array The evaluated array of number, each number corresponds to one vstack
      */
-    private function evaluate_numerical_expression($vstacks, $expression, $functype='F') {
+    private function evaluate_numerical_expression($vstacks, $expression, $functype = 'F') {
         $splitted = explode('`', preg_replace('/(@[0-9]+)/', '`$1`', $expression));
         // Check and convert the vstacks into an array of array of numbers.
         $all = array_fill(0, mycount($vstacks), []);
         for ($i = 1; $i < mycount($splitted); $i += 2) {
-            $data = $vstacks[0]->all[$splitted[$i]];    // For optimization, bypassing function call.
+            // For optimization, bypassing function call.
+            $data = $vstacks[0]->all[$splitted[$i]];
             if ($data === null || ($data->type != 'n' && $data->type != $functype)) {
                 throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
             }
@@ -1221,7 +1465,8 @@ class qtype_formulas_variables {
                 $all[0][$i] = floatval($data->value);
                 for ($j = 1; $j < mycount($vstacks); $j++) {
                     // If it need to evaluate the same expression with different values.
-                    $tmp = $vstacks[$j]->all[$splitted[$i]];    // For optimization, bypassing function call.
+                    $tmp = $vstacks[$j]->all[$splitted[$i]];
+                    // For optimization, bypassing function call.
                     if ($tmp === null || $tmp->type != 'n') {
                         throw new Exception(
                         'Unexpected error! evaluate_numerical_expression(): Variables in all $vstack must be of the same type');
@@ -1236,18 +1481,21 @@ class qtype_formulas_variables {
         $replaced = $splitted;
         for ($i = 1; $i < mycount($replaced); $i += 2) {
             if ($replaced[$i][0] == '$') {
-                $replaced[$i] = 1;  // Substitute a dummy value for testing.
+                // Substitute a dummy value for testing.
+                $replaced[$i] = 1;
             }
         }
         $res = $this->find_formula_errors(implode(' ', $replaced));
         if ($res) {
-            throw new Exception($res);   // Forward the error.
+            // Forward the error.
+            throw new Exception($res);
         }
         // Now, it should contains pure code of mathematical expression and all numerical variables are stored in $a.
         $results = [];
         foreach ($all as $a) {
             $res = null;
             try {
+                // TODO: get rid of eval function
                 eval('$res = ' . implode(' ', $splitted) . ';');
             } catch (Throwable $t) {
                 throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
@@ -1255,23 +1503,33 @@ class qtype_formulas_variables {
             if (!isset($res)) {
                 throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
             }
-            $results[] = floatval($res);    // Make sure it is a number, not other data type such as bool.
+            // Make sure it is a number, not other data type such as bool.
+            $results[] = floatval($res);
         }
 
         return $results;
     }
 
-    // Return the list of expression inside the matching open and close bracket, otherwise null.
-    // Changed to public so it can be tested from phpunit.
-    public function get_expressions_in_bracket($text, $start, $open, $bset=array('(' => ')', '[' => ']', '{' => '}')) {
+    /**
+     * Return the list of expression inside the matching open and close bracket
+     *
+     * @param string $text
+     * @param int $start
+     * @param string $open
+     * @param array $bset
+     * @return object || null
+     */
+    public function get_expressions_in_bracket($text, $start, $open, $bset = ['(' => ')', '[' => ']', '{' => '}']) {
         $bflip = array_flip($bset);
-        $ostack = [];  // Stack of open bracket.
+        // Stack of open bracket.
+        $ostack = [];
         for ($i = $start; $i < strlen($text); $i++) {
             if ($text[$i] == $open) {
                 $ostack[] = $open;
             }
             if (mycount($ostack) > 0) {
-                break;     // When the first open bracket is found.
+                // When the first open bracket is found.
+                break;
             }
         }
         if (mycount($ostack) == 0) {
@@ -1295,13 +1553,20 @@ class qtype_formulas_variables {
             }
             if (mycount($ostack) == 0) {
                 $expressions[] = substr($text, $ploc, $i - $ploc);
-                return (object)array('openloc' => $firstopenloc, 'closeloc' => $i, 'expressions' => $expressions);
+                return (object)['openloc' => $firstopenloc, 'closeloc' => $i, 'expressions' => $expressions];
             }
         }
         throw new Exception(get_string('error_vars_bracket_mismatch', 'qtype_formulas'));
     }
 
-    // Get the variable immediately before the location $loc.
+    /**
+     * Get the variable immediately before the location $loc
+     *
+     * @param object $vstack
+     * @param string $text
+     * @param int $loc
+     * @return object || null
+     */
     private function get_previous_variable(&$vstack, $text, $loc) {
         if (!preg_match('/((@[0-9]+)\s*)$/', substr($text, 0, $loc), $m)) {
             return null;
@@ -1310,10 +1575,17 @@ class qtype_formulas_variables {
         if ($var === null) {
             return null;
         }
-        return (object)array('startloc' => $loc - strlen($m[1]), 'var' => $var);
+        return (object)['startloc' => $loc - strlen($m[1]), 'var' => $var];
     }
 
-    // Get the variable immediately at and after the location $loc (inclusive).
+    /**
+     * Get the variable immediately at and after the location $loc (inclusive).
+     *
+     * @param object $vstack
+     * @param string $text
+     * @param int $loc
+     * @return object || null
+     */
     private function get_next_variable(&$vstack, $text, $loc) {
         if (!preg_match('/^(\s*(@[0-9]+))/', substr($text, $loc), $m)) {
             return null;
@@ -1322,24 +1594,46 @@ class qtype_formulas_variables {
         if ($var === null) {
             return null;
         }
-        return (object)array('startloc' => $loc + (strlen($m[1]) - strlen($m[2])), 'endloc' => $loc + strlen($m[1]), 'var' => $var);
+        return (object)['startloc' => $loc + (strlen($m[1]) - strlen($m[2])), 'endloc' => $loc + strlen($m[1]), 'var' => $var];
     }
 
-    // Replace the expression[left..right] by the variable with $value.
+    /**
+     * Replace the expression[left..right] by the variable with $value.
+     *
+     * @param object $vstack
+     * @param string $expression
+     * @param int $left
+     * @param int $right
+     * @param string $type
+     * @param number $value
+     * @return string
+     */
     private function replace_middle(&$vstack, &$expression, $left, $right, $type, $value) {
         $name = $this->vstack_add_temporary_variable($vstack, $type, $value);
         $expression = substr($expression, 0, max(0, $left)) . $name . substr($expression, $right);
     }
 
-    // Remove the user comments, that is the string between # and the end of line.
+    /**
+     * Remove the user comments, that is the string between # and the end of line.
+     *
+     * @param string $text
+     * @return string
+     */
     private function trim_comments($text) {
         return preg_replace('/'.chr(35).'.*$/m', "\n", $text);
     }
 
-    // Return the information of the formula by substituting numbers, variables and functions.
+    /**
+     * Return the information of the formula by substituting numbers, variables and functions.
+     *
+     * @param object $vars
+     * @param string $text
+     * @return object || null
+     */
     public function get_formula_information($vars, $text) {
         if (!preg_match('/^[A-Za-z0-9._ )(^\/*+-]*$/', $text)) {
-            return null;   // Formula can only contains these characters.
+            // Formula can only contains these characters.
+            return null;
         }
         $vstack = clone $vars;
         $sub = $text;
@@ -1357,10 +1651,16 @@ class qtype_formulas_variables {
         return $vstack;
     }
 
-    // Split the input into number/numeric/numerical formula and unit.
+    /**
+     * Split the input into number/numeric/numerical formula and unit.
+     *
+     * @param string $text
+     * @return array
+     */
     public function split_formula_unit($text) {
         if (preg_match('/[`@]/', $text)) {
-            return ['', $text];   // Note: these symbols is reserved to split str.
+            // Note: these symbols is reserved to split str.
+            return ['', $text];
         }
         $vstack = $this->vstack_create();
         $sub = $text;
@@ -1371,10 +1671,17 @@ class qtype_formulas_variables {
         $spl = explode('`', preg_replace('/([^@0-9 )(^\/*+-])(.*)$/', '`$1$2', $sub));
         $num = $this->substitute_placeholders_in_text($vstack, $spl[0]);
         $unit = (!isset($spl[1])) ? '' : $this->substitute_placeholders_in_text($vstack, $spl[1]);
-        return [$num, $unit];  // Don't trim them, otherwise the recombination may differ by a space.
+        // Don't trim them, otherwise the recombination may differ by a space.
+        return [$num, $unit];
     }
 
-    // Translate the input formula $text into the corresponding evaluable mathematical formula in php.
+    /**
+     * Translate the input formula $text into the corresponding evaluable mathematical formula in php.
+     *
+     * @param object $vstack
+     * @param string $text
+     * @return string
+     */
     public function replace_evaluation_formula(&$vstack, $text) {
         $text = $this->insert_multiplication_for_juxtaposition($vstack, $text);
         $text = $this->replace_caret_by_power($vstack, $text);
@@ -1382,29 +1689,44 @@ class qtype_formulas_variables {
         return $text;
     }
 
-    // Replace the user input function in the vstack by another function.
+    /**
+     * Replace the user input function in the vstack by another function.
+     *
+     * @param object $vstack
+     * @param array $replacementlist
+     * @return object
+     */
     public function replace_vstack_variables($vstack, $replacementlist) {
-        $res = clone $vstack;   // The $vstack->all will be used so it needs to clone deeply.
+        // The $vstack->all will be used so it needs to clone deeply.
+        $res = clone $vstack;
         foreach ($res->all as $name => $v) {
             if (is_string($v->value)) {
-                $res->all[$name] = (object)array('type' => $v->type, 'value' =>
-                array_key_exists($v->value, $replacementlist) ? $replacementlist[$v->value] : $v->value);
+                $res->all[$name] = (object)['type' => $v->type, 'value' =>
+                array_key_exists($v->value, $replacementlist) ? $replacementlist[$v->value] : $v->value];
             }
         }
         return $res;
     }
 
-    // Insert the multiplication symbol whenever juxtaposition occurs.
+    /**
+     * Insert the multiplication symbol whenever juxtaposition occurs.
+     *
+     * @param object $vstack
+     * @param string $text
+     * @return string
+     */
     public function insert_multiplication_for_juxtaposition($vstack, $text) {
         $splitted = explode('`', preg_replace('/(@[0-9]+)/', '`$1`', $text));
         for ($i = 3; $i < mycount($splitted); $i += 2) {
             // The length will always be odd: placeholder in odd index, operators in even index.
             $op = trim($splitted[$i - 1]);    // The operator(s) between this and the previous variable.
             if ($this->vstack_get_variable($vstack, $splitted[$i - 2])->type == 'f') {
-                continue;   // No need to add '*' if the left is function.
+                // No need to add '*' if the left is function.
+                continue;
             }
             if (strlen($op) == 0) {
-                $op = ' * ';    // Add multiplication if no operator.
+                // Add multiplication if no operator.
+                $op = ' * ';
             } else if ($op[0] == '(') {
                 $op = ' * '.$op;
             } else if ($op[strlen($op) - 1] == ')') {
@@ -1417,10 +1739,18 @@ class qtype_formulas_variables {
         return implode('', $splitted);
     }
 
-    // Replace the expression x^y by pow(x, y).
+    /**
+     * Replace caret by power
+     *
+     * Replace the expression x^y by pow(x, y).
+     * @param object $vstack
+     * @param string $text
+     * @return string
+     */
     public function replace_caret_by_power($vstack, $text) {
         while (true) {
-            $loc = strrpos($text, '^');    // From right to left.
+            // From right to left.
+            $loc = strrpos($text, '^');
             if ($loc === false) {
                 break;
             }
@@ -1465,11 +1795,19 @@ class qtype_formulas_variables {
         return $text;
     }
 
-    // Return the float value of number, numeric, or numerical formula, null when format incorrect.
+    /**
+     * Compute numerical format value
+     *
+     * Return the float value of number, numeric, or numerical formula, null when format incorrect.
+     * @param string $str
+     * @param int $gradingtype 10 100
+     * @return number || null
+     */
     public function compute_numerical_formula_value($str, $gradingtype) {
         $info = $this->get_formula_information($this->vstack_create(), $str);
         if ($info === null) {
-            return null;   // If the students' formula contains any disallowed characters.
+            // If the students' formula contains any disallowed characters.
+            return null;
         }
         try {
             if ($gradingtype == 100) {
@@ -1482,7 +1820,7 @@ class qtype_formulas_variables {
                 }
                 $info = $this->replace_vstack_variables($info, $this->evalreplacelist);
                 $tmp = $this->replace_evaluation_formula($info, $info->sub);
-                $nums = $this->evaluate_numerical_expression(array($info), $tmp, 'f');
+                $nums = $this->evaluate_numerical_expression([$info], $tmp, 'f');
                 return $nums[0];
             } else if ($gradingtype == 10) {
                 // For numeric format.
@@ -1494,7 +1832,7 @@ class qtype_formulas_variables {
                 }
                 $info = $this->replace_vstack_variables($info, $this->evalreplacelist);
                 $tmp = $this->replace_evaluation_formula($info, $info->sub);
-                $nums = $this->evaluate_numerical_expression(array($info), $tmp, 'f');
+                $nums = $this->evaluate_numerical_expression([$info], $tmp, 'f');
                 return $nums[0];
             } else {
                 // When $gradingtype != {10, 100, 1000}, for unknown type, all are treated as number.
@@ -1507,20 +1845,32 @@ class qtype_formulas_variables {
                 return floatval($str);
             }
         } catch (Exception $e) {
-            return null; // Any error means that the $str cannot be evaluated to a number.
+            // Any error means that the $str cannot be evaluated to a number.
+            return null;
         }
     }
 
-    // Find the numerical value of students response $B and compute the difference between the modelanswer and students response.
+    /**
+     * Find the numerical value of students response $B and compute the difference between the modelanswer and students response.
+     *
+     * @param int $a
+     * @param int $b
+     * @param number $cfactor
+     * @param int $gradingtype 10 100
+     * @return array || null
+     */
     public function compute_numerical_formula_difference(&$a, &$b, $cfactor, $gradingtype) {
         $diffs = [];
         for ($i = 0; $i < mycount($b); $i++) {
             $value = $this->compute_numerical_formula_value($b[$i], $gradingtype);
             if ($value === null) {
-                return null;  // If the coordinate cannot convert to a number.
+                // If the coordinate cannot convert to a number.
+                return null;
             }
-            $b[$i] = $value * $cfactor;         // Rescale students' response to match unit of model answer.
-            $diffs[$i] = abs($a[$i] - $b[$i]);  // Calculate the difference between students' response and model answer.
+            // Rescale students' response to match unit of model answer.
+            $b[$i] = $value * $cfactor;
+            // Calculate the difference between students' response and model answer.
+            $diffs[$i] = abs($a[$i] - $b[$i]);
             if (is_nan($a[$i])) {
                 $a[$i] = INF;
             }
@@ -1534,8 +1884,16 @@ class qtype_formulas_variables {
         return $diffs;
     }
 
-    // Compute the average L1-norm between $A and $B, evaluated at $N random points given by the random variables in $vars.
-    public function compute_algebraic_formula_difference(&$vars, $a, $b, $n=100) {
+    /**
+     * Compute the average L1-norm between $A and $B, evaluated at $N random points given by the random variables in $vars.
+     *
+     * @param array $vars
+     * @param int $a
+     * @param int $b
+     * @param int $n
+     * @return array || null
+     */
+    public function compute_algebraic_formula_difference(&$vars, $a, $b, $n = 100) {
         if ($n < 1) {
             $n = 100;
         }
@@ -1598,7 +1956,8 @@ class qtype_formulas_variables {
             for ($i = 0; $i < mycount($nums); $i++) {
                 $nums[$i] = $nums[$i] * $nums[$i];
             }
-            $res = sqrt(array_sum($nums) / $n);    // It must be a positive integer, Nan or inf.
+            // It must be a positive integer, Nan or inf.
+            $res = sqrt(array_sum($nums) / $n);
             if (is_nan($res)) {
                 $res = INF;
             }
@@ -1607,13 +1966,19 @@ class qtype_formulas_variables {
         return $diffs;
     }
 
-    // Substitute the variable with numeric value in the list of algebraic formulas,
-    // It is used to show correct answer with random numeric value.
+    /**
+     * Substitute the variable with numeric value in the list of algebraic formulas
+     *
+     * @param array $vars
+     * @param array $formulas
+     * @return array || null
+     */
     public function substitute_partial_formula(&$vars, $formulas) {
         $res = [];
         for ($idx = 0; $idx < mycount($formulas); $idx++) {
             if (!is_string($formulas[$idx])) {
-                return null;  // Internal error for calling this function.
+                // Internal error for calling this function.
+                return null;
             }
             $formulas[$idx] = trim($formulas[$idx]);
             $vstack = $this->get_formula_information($vars, $formulas[$idx]);
@@ -1647,20 +2012,17 @@ class qtype_formulas_variables {
      * Check the validity of formula. From calculated question type. Modified.
      *
      * @param string $formula The input formula
-     * @return false for possible valid formula, otherwise error message
+     * @return boolean false for possible valid formula, otherwise error message
      */
     public function find_formula_errors($formula) {
-        // Validates the formula submitted from the question edit page.
-        // Returns false if everything is alright.
-        // Otherwise it constructs an error message
         // Strip away empty space and lowercase it.
         $formula = str_replace(' ', '', $formula);
 
         $safeoperatorchar = '-+/*%>:^\~<?=&|!'; /* */
         $operatorornumber = "[$safeoperatorchar.0-9eE]";
+        $str = "~(^|[$safeoperatorchar,(])([a-z0-9_]*)\\(($operatorornumber+(,$operatorornumber+((,$operatorornumber+)+)?)?)?\\)~";
 
-        while ( preg_match("~(^|[$safeoperatorchar,(])([a-z0-9_]*)\\(($operatorornumber+(,$operatorornumber+((,$operatorornumber+)+)?)?)?\\)~",
-            $formula, $regs)) {
+        while ( preg_match($str, $formula, $regs)) {
             for ($i = 0; $i < 6; $i++) {
                 if (!isset($regs[$i])) {
                     $regs[] = '';
@@ -1751,8 +2113,7 @@ class qtype_formulas_variables {
                     return get_string('unsupportedformulafunction', 'qtype_formulas', $regs[2]);
             }
 
-            // Exchange the function call with '1' and then check for
-            // another function call...
+            // Exchange the function call with '1' and then check for another function call...
             if ($regs[1]) {
                 // The function call is proceeded by an operator.
                 $formula = str_replace($regs[0], $regs[1] . '1', $formula);

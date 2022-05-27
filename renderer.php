@@ -182,6 +182,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Number in style
      *
+     * TODO: This function is never used and just a copy of the multichoice question?
      * @param int $num The number, starting at 0.
      * @param string $style The style to render the number in. One of the
      * @return string the number $num in the requested style.
@@ -328,7 +329,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         if ($options->readonly) {
                             $inputattributes['disabled'] = 'disabled';
                         }
-                        $output = $this->all_choices_wrapper_start();
+                        $output = html_writer::start_tag('div', ['class' => 'multichoice_answer']);
                         foreach ($stexts->value as $x => $mctxt) {
                             $mctxt = html_writer::span($this->number_in_style($x, $question->answernumbering), 'answernumber')
                                     . $question->format_text($mctxt, $part->subqtextformat , $qa,
@@ -345,12 +346,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                             if ($options->correctness && $isselected) {
                                 $class .= ' ' . $sub->feedbackclass;
                             }
-                            $output .= $this->choice_wrapper_start($class);
+                            $output .= html_writer::start_tag('div', ['class' => $class]);
                             $output .= html_writer::empty_tag('input', $inputattributes);
                             $output .= html_writer::tag('label', $mctxt, ['for' => $inputattributes['id'], 'class' => 'm-l-1']);
-                            $output .= $this->choice_wrapper_end();
+                            $output .= html_writer::end_tag('div');
                         }
-                        $output .= $this->all_choices_wrapper_end();
+                        $output .= html_writer::end_tag('div');
                         $inputs[$placeholder] = $output;
                     }
                 }
@@ -412,42 +413,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     /**
-     * Choice wrapper start.
-     *
-     * @param string $class class attribute value.
-     * @return string HTML to go before each choice.
-     */
-    protected function choice_wrapper_start($class) {
-        return html_writer::start_tag('div', ['class' => $class]);
-    }
-
-    /**
-     * Choice wrapper end.
-     *
-     * @return string HTML to go after each choice.
-     */
-    protected function choice_wrapper_end() {
-        return html_writer::end_tag('div');
-    }
-
-    /**
-     * All choices wrapper start.
-     *
-     * @return string HTML to go before all the choices.
-     */
-    protected function all_choices_wrapper_start() {
-        return html_writer::start_tag('div', ['class' => 'multichoice_answer']);
-    }
-
-    /**
-     * All choices wrapper end.
-     *
-     * @return string HTML to go after all the choices.
-     */
-    protected function all_choices_wrapper_end() {
-        return html_writer::end_tag('div');
-    }
-    /**
      * Correct response is provided by each question part.
      *
      * @param question_attempt $qa the question attempt to display.
@@ -483,13 +448,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment.
      */
     protected function num_parts_correct(question_attempt $qa) {
+        $question = $qa->get_question();
         $response = $qa->get_last_qt_data();
-        if (!$qa->get_question()->is_gradable_response($response)) {
+        if (!$question->is_gradable_response($response)) {
             return '';
         }
         $a = new stdClass();
-        list($a->num, $a->outof) = $qa->get_question()->get_num_parts_right(
-                $response);
+        list($a->num, $a->outof) = $question->get_num_parts_right($response);
         if (is_null($a->outof)) {
             return '';
         } else {
@@ -510,7 +475,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $question = $qa->get_question();
         $globalvars = $question->get_global_variables();
         $hint->hint = $question->qv->substitute_variables_in_text($globalvars, $hint->hint);
-        return html_writer::nonempty_tag('div', $qa->get_question()->format_hint($hint, $qa), ['class' => 'hint']);
+        return html_writer::nonempty_tag('div', $question->format_hint($hint, $qa), ['class' => 'hint']);
     }
 
     /**
@@ -521,27 +486,24 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     protected function combined_feedback(question_attempt $qa) {
         $question = $qa->get_question();
-
         $state = $qa->get_state();
 
         if (!$state->is_finished()) {
             $response = $qa->get_last_qt_data();
-            if (!$qa->get_question()->is_gradable_response($response)) {
+            if (!$question->is_gradable_response($response)) {
                 return '';
             }
-            list($notused, $state) = $qa->get_question()->grade_response($response);
+            list($notused, $state) = $question->grade_response($response);
         }
 
-        $feedback = '';
         $field = $state->get_feedback_class() . 'feedback';
-        $format = $state->get_feedback_class() . 'feedbackformat';
         if ($question->$field) {
+            $format = $state->get_feedback_class() . 'feedbackformat';
             $globalvars = $question->get_global_variables();
-            $feedback .= $question->formulas_format_text($globalvars, $question->$field, $question->$format,
-                    $qa, 'question', $field, $question->id, false);
+            return $question->formulas_format_text(
+                $globalvars, $question->$field, $question->$format, $qa, 'question', $field, $question->id, false);
         }
-
-        return $feedback;
+        return '';
     }
 
     /**
@@ -567,7 +529,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             return '';
         }
 
-        $feedback = '';
         $gradingdetails = '';
         $question = $qa->get_question();
         $state = $qa->get_state();

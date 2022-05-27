@@ -151,9 +151,9 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['vars1']['advanced'] = true;
         // Part's answer type (0, 10, 100, 1000).
         $repeated[] = $mform->createElement('select', 'answertype', get_string('answertype', 'qtype_formulas'),
-               [0 => get_string('number', 'qtype_formulas'), 10 => get_string('numeric', 'qtype_formulas'),
-                100 => get_string('numerical_formula', 'qtype_formulas'),
-                1000 => get_string('algebraic_formula', 'qtype_formulas')]);;
+           [0 => get_string('number', 'qtype_formulas'), 10 => get_string('numeric', 'qtype_formulas'),
+            100 => get_string('numerical_formula', 'qtype_formulas'),
+            1000 => get_string('algebraic_formula', 'qtype_formulas')]);;
         $repeatedoptions['answertype']['default'] = $config->defaultanswertype;
         $repeatedoptions['answertype']['type'] = PARAM_INT;
         $repeatedoptions['answertype']['helpbutton'] = ['answertype', 'qtype_formulas'];
@@ -162,7 +162,8 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['answer']['helpbutton'] = ['answer', 'qtype_formulas'];
         $repeatedoptions['answer']['type'] = PARAM_RAW;
         // Part's grading variables.
-        $repeated[] = $mform->createElement('textarea', 'vars2', get_string('vars2', 'qtype_formulas'), ['cols' => 80, 'rows' => 1]);
+        $repeated[] = $mform->createElement('textarea', 'vars2', get_string('vars2', 'qtype_formulas'),
+            ['cols' => 80, 'rows' => 1]);
         $repeatedoptions['vars2']['helpbutton'] = ['vars2', 'qtype_formulas'];
         $repeatedoptions['vars2']['advanced'] = true;
         // Part's grading criteria.

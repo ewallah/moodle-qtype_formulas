@@ -134,9 +134,10 @@ class qtype_formulas_test_helper extends question_test_helper {
                 . ' (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>';
 
         $q->penalty = 0.3; // Non-zero and not the default.
-        $q->textfragments = [0 => '<p>Minimal question : For a minimal question, you must define a part with'
-                                  . ' (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>',
-                                  1 => ''];
+        $q->textfragments = [
+            0 => '<p>Minimal question : For a minimal question, you must define a part with' .
+                 ' (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>',
+            1 => ''];
         $q->numpart = 1;
         $q->defaultmark = 2;
         $p = self::make_a_formulas_part();
@@ -158,10 +159,11 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->name = 'test-1';
         $q->questiontext = '<p>Multiple parts : --{#1}--{#2}--{#3}</p>';
         $q->penalty = 0.3; // Non-zero and not the default.
-        $q->textfragments = [0 => '<p>Multiple parts : --',
-                1 => '--',
-                2 => '--',
-                3 => '</p>'];
+        $q->textfragments = [
+            0 => '<p>Multiple parts : --',
+            1 => '--',
+            2 => '--',
+            3 => '</p>'];
         $q->numpart = 3;
         $q->defaultmark = 6;
         $p0 = self::make_a_formulas_part();
@@ -283,12 +285,12 @@ class qtype_formulas_test_helper extends question_test_helper {
         // Non-zero and not the default.
         $q->penalty = 0.3;
         $q->numpart = 4;
-        $q->textfragments = [0 => '<p>This question shows different display methods of the answer and unit box.</p>',
-                1 => '',
-                2 => '',
-                3 => '',
-                4 => '',
-                ];
+        $q->textfragments = [
+            0 => '<p>This question shows different display methods of the answer and unit box.</p>',
+            1 => '',
+            2 => '',
+            3 => '',
+            4 => ''];
         $q->varsrandom = '';
         $q->varsglobal = 'v = 40;dt = 3;s = v*dt;';
         $p0 = self::make_a_formulas_part();
@@ -577,11 +579,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->penalty = 0.3;
         $q->numpart = 4;
         $q->textfragments = [0 => '<p>This question shows different display methods of the answer and unit box.</p>',
-                1 => '',
-                2 => '',
-                3 => '',
-                4 => '',
-                ];
+            1 => '',
+            2 => '',
+            3 => '',
+            4 => ''];
         $q->varsrandom = 'v = {20:100:10}; dt = {2:6};';
         $q->varsglobal = 's = v*dt;';
         $p0 = self::make_a_formulas_part();
@@ -688,8 +689,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->varsglobal = 'mychoices=["Dog","Cat","Bird","Fish"];';
         // Non-zero and not the default.
         $q->penalty = 0.3;
-        $q->textfragments = [0 => '<p>This question has a multichoice answer.</p>',
-                                  1 => ''];
+        $q->textfragments = [0 => '<p>This question has a multichoice answer.</p>', 1 => ''];
         $q->numpart = 1;
         $q->defaultmark = 2;
         $p = self::make_a_formulas_part();

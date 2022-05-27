@@ -16,7 +16,7 @@
 /**
  * Javascript function for the editing interface of formulas question type
  *
- * @copyright &copy; 2010-2011 Hon Wai, Lau
+ * @copyright 2010-2011 Hon Wai, Lau
  * @author Hon Wai, Lau <lau65536@gmail.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
