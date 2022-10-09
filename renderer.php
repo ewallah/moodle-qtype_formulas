@@ -39,8 +39,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment.
      */
     public function formulation_and_controls(question_attempt $qa, question_display_options $options) {
-        global $CFG;
-
         $question = $qa->get_question();
 
         $globalvars = $question->get_global_variables();
@@ -569,7 +567,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
             // This is rather a hack, but it will probably work.
-            $renderer = $this->page->get_renderer('qbehaviour_adaptivemultipart');
+            $this->page->get_renderer('qbehaviour_adaptivemultipart');
             $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
             $feedbackclass = $details->state->get_feedback_class();
         } else {

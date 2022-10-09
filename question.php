@@ -346,7 +346,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * Categorise the student's response according to the categories defined by get_possible_responses.
      *
      * @param array $response a response
-     * @return array subpartid =>  objects
+     * @return array subpartid => objects
      */
     public function classify_response(array $response) {
         $this->rationalize_responses($response);
@@ -362,29 +362,30 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
             if ($part->postunit != '') {
                 if ($anscorr == 1 && $unitcorr == 1) {
-                    $classification[$part->partindex] = new question_classified_response(
-                        'right', $part->part_summarise_response($response), 1);
+                    $classification[$part->partindex] =
+                        new question_classified_response('right', $part->part_summarise_response($response), 1);
                 }
                 if ($anscorr == 0 && $unitcorr == 1) {
-                    $classification[$part->partindex] = new question_classified_response(
-                        'wrongvalue', $part->part_summarise_response($response), 0);
+                    $classification[$part->partindex] =
+                        new question_classified_response('wrongvalue', $part->part_summarise_response($response), 0);
                 }
                 if ($anscorr == 1 && $unitcorr == 0) {
-                    $classification[$part->partindex] = new question_classified_response(
-                        'wrongunit', $part->part_summarise_response($response), 1 - $part->unitpenalty);
+                    $penalty = 1 - $part->unitpenalty;
+                    $classification[$part->partindex] =
+                        new question_classified_response('wrongunit', $part->part_summarise_response($response), $penalty);
                 }
                 if ($anscorr == 0 && $unitcorr == 0) {
-                    $classification[$part->partindex] = new question_classified_response(
-                        'wrong', $part->part_summarise_response($response), 0);
+                    $classification[$part->partindex] =
+                        new question_classified_response('wrong', $part->part_summarise_response($response), 0);
                 }
             } else {
                 $fraction = $anscorr * ($unitcorr ? 1 : (1 - $part->unitpenalty));
                 if ($fraction > .999) {
-                    $classification[$part->partindex] = new question_classified_response(
-                        'right', $part->part_summarise_response($response), $fraction);
+                    $classification[$part->partindex] =
+                        new question_classified_response('right', $part->part_summarise_response($response), $fraction);
                 } else {
-                     $classification[$part->partindex] = new question_classified_response(
-                        'wrong', $part->part_summarise_response($response), $fraction);
+                     $classification[$part->partindex] =
+                        new question_classified_response('wrong', $part->part_summarise_response($response), $fraction);
                 }
             }
 
@@ -541,9 +542,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function add_special_correctness_variables(&$vars, $a, $r, $diff, $isnumber) {
         // Calculate other special variables.
-        $sum0 = $sum1 = $sum2 = 0;
+        $sum1 = 0;
         foreach ($r as $idx => $coord) {
-            $sum2 += $diff[$idx] * $diff[$idx];
+            $sum1 += $diff[$idx] * $diff[$idx];
         }
         $t = is_string($r[0]) ? 's' : 'n';
         // Add the special variables to the variable pool for later grading.
@@ -557,7 +558,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // Array of model answers.
         $this->qv->vstack_update_variable($vars, '_d', null, 'ln', $diff);
         // Array of difference between responses and model answers.
-        $this->qv->vstack_update_variable($vars, '_err', null, 'n', sqrt($sum2));
+        $this->qv->vstack_update_variable($vars, '_err', null, 'n', sqrt($sum1));
         // Error in Euclidean space, L-2 norm, sqrt(sum(map("pow",_diff,2))).
 
         // Calculate the relative error. We only define relative error for number or numerical expression.
@@ -566,7 +567,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             foreach ($a as $idx => $coord) {
                 $normsqr += $coord * $coord;
             }
-            $relerr = $normsqr != 0 ? sqrt($sum2 / $normsqr) : ($sum2 == 0 ? 0 : 1e30);
+            $relerr = $normsqr != 0 ? sqrt($sum1 / $normsqr) : ($sum1 == 0 ? 0 : 1e30);
             // If the model answer is zero, the answer from student must also match exactly.
             $this->qv->vstack_update_variable($vars, '_relerr', null, 'n', $relerr);
         }

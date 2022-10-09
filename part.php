@@ -153,7 +153,7 @@ class qtype_formulas_part {
      * @return bool whether the two sets of responses are the same for the given part.
      */
     public function part_is_same_response(array $prevresponse, array $newresponse) {
-        foreach ($this->part_get_expected_data() as $name => $type) {
+        foreach ($this->part_get_expected_data() as $name => $unused) {
             if (!question_utils::arrays_same_at_key_missing_is_blank($prevresponse, $newresponse, $name)) {
                 return false;
             }
@@ -230,7 +230,7 @@ class qtype_formulas_part {
      */
     public function part_summarise_response(array $response) {
         $summary = [];
-        foreach ($this->part_get_expected_data() as $name => $type) {
+        foreach ($this->part_get_expected_data() as $name => $unused) {
             $summary[] = (array_key_exists($name, $response)) ? $response[$name] : '';
         }
         return implode(', ', $summary);

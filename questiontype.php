@@ -192,8 +192,6 @@ class qtype_formulas extends question_type {
         global $DB;
 
         $context = $question->context;
-        $result = new stdClass();
-
         $oldanswers = $DB->get_records('qtype_formulas_answers', ['questionid' => $question->id], 'partindex ASC');
         try {
             $filtered = $this->validate($question); // Data from the web input interface should be validated.
@@ -207,7 +205,6 @@ class qtype_formulas extends question_type {
             foreach ($answersorder as $newloc) {
                 $newanswers[] = $filtered->answers[$newloc];
             }
-            $idcount = 0;
             foreach ($newanswers as $i => $ans) {
                 $ans->partindex = $i;
                 $ans->questionid = $question->id;
@@ -299,7 +296,7 @@ class qtype_formulas extends question_type {
         $DB->update_record('qtype_formulas_options', $options);
 
         $this->save_hints($question, true);
-        return true;
+        return (object)[];
     }
 
 
@@ -623,7 +620,7 @@ class qtype_formulas extends question_type {
     public function check_and_filter_answers($form) {
         $tags = $this->part_tags();
         $res = (object)['answers' => []];
-        foreach ($form->answermark as $i => $a) {
+        foreach ($form->answermark as $i => $unused) {
             if ((strlen(trim($form->answermark[$i])) == 0 || strlen(trim($form->answer[$i])) == 0)
                     && (strlen(trim($form->subqtext[$i]['text'])) != 0
                     || strlen(trim($form->feedback[$i]['text'])) != 0
@@ -722,7 +719,7 @@ class qtype_formulas extends question_type {
                 $pattern = '\{(_[0-9u][0-9]*)(:[^{}]+)?\}';
                 preg_match_all('/'.$pattern.'/', $part->subqtext['text'], $matches);
                 $boxes = [];
-                foreach ($matches[1] as $j => $match) {
+                foreach ($matches[1] as $unuaed => $match) {
                     if (array_key_exists($match, $boxes)) {
                         throw new Exception(get_string('error_answerbox_duplicate', 'qtype_formulas'));
                     } else {
@@ -772,7 +769,7 @@ class qtype_formulas extends question_type {
         }
 
         if (count($form->answer)) {
-            foreach ($form->answer as $key => $answer) {
+            foreach ($form->answer as $key => $unused) {
                 $ans = new stdClass();
                 foreach ($tags as $tag) {
                     $ans->{$tag} = $form->{$tag}[$key];
@@ -929,9 +926,8 @@ class qtype_formulas extends question_type {
         // Performs stable sort of locations.
         sort($locations);
 
-        $ss = new stdClass();
         $answersorder = [];
-        foreach ($locations as $i => $location) {
+        foreach ($locations as $unused => $location) {
             // Store the new location of the answer in the main text.
             $answersorder[] = $location % 1000;
         }
@@ -944,4 +940,3 @@ class qtype_formulas extends question_type {
         return $answersorder;
     }
 }
-

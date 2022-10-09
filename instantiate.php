@@ -142,7 +142,7 @@ function filter_redundant_names($data, $names, $a, $b) {
     }
     foreach ($names[$a] as $name) {
         if (check_include_name($data, $names, $a, $b, $name)) {
-            $tmp[] = $n;
+            $tmp[] = $name;
         }
     }
     return $tmp;

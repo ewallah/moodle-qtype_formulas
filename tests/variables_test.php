@@ -75,7 +75,7 @@ class variables_test extends advanced_testcase {
             $errmsg = $e->getMessage();
         }
         $this->assertNull($errmsg);
-        $this->assertEquals(-0.35473297204849, $result->value);
+        $this->assertEquals(-0.35473297204849324, $result->value);
         $this->assertEquals('n', $result->type);
     }
 
@@ -98,7 +98,7 @@ class variables_test extends advanced_testcase {
                     'a' => (object) ['type' => 'n', 'value' => 1],
                     'b' => (object) ['type' => 'n', 'value' => 4],
                     'c' => (object) ['type' => 'n', 'value' => 4],
-                    'g' => (object) ['type' => 'ln', 'value' => [1, 47 , 2 , 2.718281828459, 16]]]],
+                    'g' => (object) ['type' => 'ln', 'value' => [1, 47 , 2 , 2.718281828459045, 16]]]],
             [true, 'h = [1,2+3,sin(4),5]; j=h[1];', [
                     'h' => (object) ['type' => 'ln', 'value' => [1, 5 , -0.7568024953079282, 5]],
                     'j' => (object) ['type' => 'n', 'value' => 5]]],
@@ -226,7 +226,7 @@ class variables_test extends advanced_testcase {
                     's' => (object) ['type' => 'ls', 'value' => ['A', 'B', 'C', 'D']]]],
             [true, 'a=[1,2,3]; A=map("exp",a);', [
                     'a' => (object) ['type' => 'ln', 'value' => [1, 2, 3]],
-                    'A' => (object) ['type' => 'ln', 'value' => [2.718281828459, 7.3890560989307, 20.085536923188]]]],
+                    'A' => (object) ['type' => 'ln', 'value' => [2.718281828459045, 7.38905609893065, 20.085536923187668]]]],
             [true, 'a=[1,2,3]; A=map("+",a,2.3);', [
                     'a' => (object) ['type' => 'ln', 'value' => [1, 2, 3]],
                     'A' => (object) ['type' => 'ln', 'value' => [3.3, 4.3, 5.3]]]],
@@ -360,7 +360,7 @@ class variables_test extends advanced_testcase {
                 // To predict the result we choose the dataset rather than having it at random.
                 $dataset = (int) ($qv->vstack_get_number_of_dataset($var) / 2);
                 $inst = $qv->instantiate_random_variables($var, $dataset);
-                $serialized = $qv->vstack_get_serialization($inst);
+                $qv->vstack_get_serialization($inst);
             } catch (Exception $e) {
                 $errmsg = $e->getMessage();
             }
@@ -455,7 +455,7 @@ class variables_test extends advanced_testcase {
             [false, 100, '3e8e8e8'],
 
             [true, 100, '3+10*4/10^4', 3.004],
-            [true, 100, 'sin(3)-3+exp(4)', 51.739270041204],
+            [true, 100, 'sin(3)-3+exp(4)', 51.7392700412041],
             [true, 100, '3*4*5', 60],
             [true, 100, '3 4 5', 60],
             [true, 100, '3e8 4.e8 .5e8', 6.0E+24],
@@ -467,14 +467,14 @@ class variables_test extends advanced_testcase {
             [true, 100, '3+4^9', 262147],
             [true, 100, '3+(4+5)^9', 387420492],
             [true, 100, '3+(4+5)^(6+7)', 2541865828332],
-            [true, 100, '3+sin(4+5)^(6+7)', 3.0000098920712],
-            [true, 100, '3+exp(4+5)^sin(6+7)', 46.881961305748],
-            [true, 100, '3+4^-(9)', 3.0000038146973],
-            [true, 100, '3+4^-9', 3.0000038146973],
-            [true, 100, '3+exp(4+5)^-sin(6+7)', 3.0227884071323],
-            [true, 100, '1+ln(3)', 2.0986122886681],
-            [true, 100, '1+log10(3)', 1.4771212547197],
-            [true, 100, 'pi', 3.1415926535898],
+            [true, 100, '3+sin(4+5)^(6+7)', 3.000009892071199],
+            [true, 100, '3+exp(4+5)^sin(6+7)', 46.881961305747545],
+            [true, 100, '3+4^-(9)', 3.0000038146972656],
+            [true, 100, '3+4^-9', 3.0000038146972656],
+            [true, 100, '3+exp(4+5)^-sin(6+7)', 3.022788407132318],
+            [true, 100, '1+ln(3)', 2.09861228866811],
+            [true, 100, '1+log10(3)', 1.4771212547196624],
+            [true, 100, 'pi', 3.141592653589793],
             [false, 100, 'pi()']];
         foreach ($testcases as $testcase) {
             $result = $qv->compute_numerical_formula_value($testcase[2], $testcase[1]);

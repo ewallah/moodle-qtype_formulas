@@ -52,7 +52,6 @@ jobs:
         run: moodle-plugin-ci --ansi phplint
 
       - name: phpcpd
-        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci --ansi phpcpd
 
@@ -67,36 +66,29 @@ jobs:
         run: moodle-plugin-ci --ansi codechecker
 
       - name: validate
-        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci --ansi validate
 
       - name: phpdoc
-        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci --ansi phpdoc
 
       - name: savepoints
-        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci --ansi savepoints
 
       - name: grunt
-        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci --ansi grunt
 
       - name: mustache
-        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci --ansi mustache
 
       - name: phpunit
-        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci --ansi phpunit --coverage-text
 
       - name: chrome
-        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci --ansi --profile=chrome behat

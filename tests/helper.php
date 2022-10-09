@@ -336,8 +336,6 @@ class qtype_formulas_test_helper extends question_test_helper {
      * @return object
      */
     public static function get_formulas_question_data_test2() {
-        global $USER;
-
         $qdata = new stdClass();
         test_question_maker::initialise_question_data($qdata);
 

@@ -71,7 +71,7 @@ class answer_unit_conversion {
     /** @var unit exclusion symbols **/
     public static $unitexcludesymbols = '][)(}{><0-9.,:;`~!@#^&*\/?|_=+ -';
 
-    /** @var For convenience, u is used for micro-, rather than "mu", which has multiple similar UTF representations. **/
+    /** @var prefix scale factors, u is used for micro-, rather than mu, which has multiple similar UTF representations. **/
     public static $prefixscalefactors = ['d' => 1e-1, 'c' => 1e-2, 'da' => 1e1, 'h' => 1e2,
         'm' => 1e-3, 'u' => 1e-6, 'n' => 1e-9, 'p' => 1e-12, 'f' => 1e-15, 'a' => 1e-18, 'z' => 1e-21, 'y' => 1e-24,
         'k' => 1e3,  'M' => 1e6,  'G' => 1e9,  'T' => 1e12,  'P' => 1e15,  'E' => 1e18,  'Z' => 1e21,  'Y' => 1e24];
@@ -394,7 +394,8 @@ class answer_unit_conversion {
                     if (preg_match('/['.self::$unitexcludesymbols.']+/', $unitname)) {
                         throw new Exception('"'.$unitname.'" unit contains unaccepted character.');
                     }
-                    $unitscales[$unitname] = 1.0;    // The original unit.
+                    // The original unit.
+                    $unitscales[$unitname] = 1.0;
                     $siprefixes = explode(' ', $e[1]);
                     foreach ($siprefixes as $prefix) {
                         if (strlen($prefix) != 0) {
