@@ -452,6 +452,39 @@ class variables {
     private static $maxdataset = 2e9;      // It is the upper limit for the exhaustive enumeration.
     private static $listmaxsize = 1000;
 
+    /**
+     * @var array constants
+     */
+    private $func_const;
+    /**
+     * @var array unary functions
+     */
+    private $func_unary;
+    /**
+     * @var array binary functions
+     */
+    private $func_binary;
+    /**
+     * @var array special functions
+     */
+    private $func_special;
+    /**
+     * @var array all functions
+     */
+    private $func_all;
+    /**
+     * @var array algebraic functions
+     */
+    private $func_algebraic;
+    /**
+     * @var array constant list
+     */
+    private $constlist;
+    /**
+     * @var array eval replace list
+     */
+    private $evalreplacelist;
+
     private function initialize_function_list() {
         $this->func_const = array_flip( array('pi', 'fqversionnumber'));
         $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil',
