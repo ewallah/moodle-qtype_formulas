@@ -613,9 +613,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $coordinates = array();
         $i = $part->partindex;
         foreach (range(0, $part->numbox - 1) as $j) {
-            $coordinates[$j] = trim($response["${i}_$j"]);
+            $coordinates[$j] = trim($response["{$i}_$j"]);
         }
-        $postunit = trim($response["${i}_{$part->numbox}"]);
+        $postunit = trim($response["{$i}_{$part->numbox}"]);
 
         // Step 2: Use the unit system to check whether the unit in student responses is *convertible* to the true unit.
         $conversionrules = new unit_conversion_rules;
@@ -950,13 +950,13 @@ class qtype_formulas_part {
         $expected = array();
         $i = $this->partindex;
         if ($this->part_has_combined_unit_field()) {
-                $expected["${i}_"] = PARAM_RAW;
+                $expected["{$i}_"] = PARAM_RAW;
         } else {
             foreach (range(0, $this->numbox - 1) as $j) {
-                $expected["${i}_$j"] = PARAM_RAW;
+                $expected["{$i}_$j"] = PARAM_RAW;
             }
             if ($this->part_has_separate_unit_field()) {
-                $expected["${i}_{$this->numbox}"] = PARAM_RAW;
+                $expected["{$i}_{$this->numbox}"] = PARAM_RAW;
             }
         }
         return $expected;
@@ -1032,11 +1032,11 @@ class qtype_formulas_part {
 
     public function part_is_unanswered(array$response) {
         $i = $this->partindex;
-        if (array_key_exists("${i}_", $response) && $response["${i}_"] != '') {
+        if (array_key_exists("{$i}_", $response) && $response["{$i}_"] != '') {
             return false;
         }
         foreach (range(0, $this->numbox) as $j) {
-            if (array_key_exists("${i}_$j", $response) && $response["${i}_$j"] != '') {
+            if (array_key_exists("{$i}_$j", $response) && $response["{$i}_$j"] != '') {
                     return false;
             }
         }
