@@ -23,7 +23,6 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
           MYSQL_CHARACTER_SET_SERVER: "utf8mb4"
           MYSQL_COLLATION_SERVER: "utf8mb4_unicode_ci"
-
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
@@ -31,22 +30,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.0', '8.1']
-        moodle-branch: ['MOODLE_39_STABLE', 'MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'master']
+        php: ['8.2']
+        moodle-branch: ['MOODLE_402_STABLE', 'master']
         database: [pgsql, mariadb]
-        exclude:
-          - moodle-branch: 'MOODLE_39_STABLE'
-            php: '8.0'
-          - moodle-branch: 'MOODLE_39_STABLE'
-            php: '8.1'
-          - moodle-branch: 'MOODLE_311_STABLE'
-            php: '8.1'
-          - moodle-branch: 'MOODLE_400_STABLE'
-            php: '8.1'
-          - moodle-branch: 'MOODLE_402_STABLE'
-            php: '7.4'
-          - moodle-branch: 'master'
-            php: '7.4'
 
     steps:
       - name: Check out repository code
@@ -58,13 +44,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: ${{ matrix.extensions }}
           ini-values: max_input_vars=5000
           coverage: none
 
       - name: Initialise moodle-plugin-ci
         run: |
-          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
           echo $(cd ci/bin; pwd) >> $GITHUB_PATH
           echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
           sudo locale-gen en_AU.UTF-8
@@ -78,11 +63,46 @@ jobs:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
 
-      - name: PHPUnit tests
+      - name: phplint
         if: ${{ always() }}
-        run: moodle-plugin-ci phpunit --fail-on-warning
+        run: moodle-plugin-ci --ansi phplint
 
-      # Behat is done separately to allow app testing as well
-      #- name: Behat features
-      #  if: ${{ always() }}
-      #  run: moodle-plugin-ci behat --profile chrome
+      - name: phpcpd
+        if: ${{ always() }}
+        run: moodle-plugin-ci --ansi phpcpd
+
+      - name: phpmd
+        if: ${{ always() }}
+        run: moodle-plugin-ci --ansi phpmd
+
+      - name: phpdoc
+        if: ${{ always() }}
+        run: moodle-plugin-ci --ansi phpdoc
+
+      - name: codechecker
+        if: ${{ always() }}
+        run: moodle-plugin-ci --ansi codechecker
+
+      - name: validate
+        if: ${{ always() }}
+        run: moodle-plugin-ci --ansi validate
+
+      - name: savepoints
+        if: ${{ always() }}
+        run: moodle-plugin-ci --ansi savepoints
+
+      - name: mustache
+        if: ${{ always() }}
+        run: moodle-plugin-ci --ansi mustache
+
+      - name: grunt
+        if: ${{ always() }}
+        run: moodle-plugin-ci --ansi grunt
+
+      - name: phpunit 
+        if: ${{ always() }}
+        run: moodle-plugin-ci phpunit --ansi --coverage-text
+
+      - name: firefox
+        if: ${{ always() }}
+        run: moodle-plugin-ci behat --ansi  behat --profile chrome
