@@ -465,6 +465,10 @@ class variables {
      */
     private $func_binary;
     /**
+     * @var array binary op map functions
+     */
+    private $func_binary_op_map;
+    /**
      * @var array special functions
      */
     private $func_special;
